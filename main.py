@@ -1,5 +1,5 @@
 from flask import Flask, render_template, url_for, redirect, session, request, jsonify
-from flask_socketio import SocketIO, send
+from flask_socketio import SocketIO
 from flask_cors import CORS
 from dotenv import load_dotenv
 
@@ -12,7 +12,6 @@ mimetypes.add_type('application/javascript', '.js')
 app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app)
-socketio.init_app(app, cors_allowed_origins="*")
 app.secret_key = '9232b3e6634925ae2e068c9810e53f4c10faef6e4ff17fb4'
 load_dotenv()
 
