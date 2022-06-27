@@ -1,7 +1,7 @@
 import {boardsManager} from "./controller/boardsManager.js";
 
-export const socket = io();
-socket.connect('http://127.0.0.1:5000/');
+export const socket = new Server();
+socket.connect('https://proman-code-cool.herokuapp.com/');
 
 function init() {
     boardsManager.loadBoards(userId);
