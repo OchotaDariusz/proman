@@ -11,7 +11,7 @@ import queries
 mimetypes.add_type('application/javascript', '.js')
 app = Flask(__name__)
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins=['https://proman-code-cool.herokuapp.com'])
 app.secret_key = '9232b3e6634925ae2e068c9810e53f4c10faef6e4ff17fb4'
 load_dotenv()
 
