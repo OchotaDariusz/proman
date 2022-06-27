@@ -1,6 +1,6 @@
 import {boardsManager} from "./controller/boardsManager.js";
 
-export const socket = io();
+export const socket = io('/', {transports: ['websocket']});
 socket.connect('https://proman-code-cool.herokuapp.com/');
 
 function init() {
