@@ -31,6 +31,7 @@
 {% include 'include/add-private-board.html' %}
 
 <h1>ProMan</h1>
+<small style="text-align: center;">Syncs every minute...</small>
 
 <div class="navbar">
     <nav>
@@ -68,7 +69,7 @@
 {% endif %}
 
 
-<script type="module" src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
+{#<script type="module" src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>#}
 <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
 <script type="module" src="{{ url_for('static', filename='js/popup.js') }}"></script>
 </body>
