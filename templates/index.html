@@ -31,7 +31,6 @@
 {% include 'include/add-private-board.html' %}
 
 <h1>ProMan</h1>
-<small style="text-align: center;">Syncs every minute...</small>
 
 <div class="navbar">
     <nav>
@@ -56,6 +55,8 @@
         <button type="button" id="add-private-board-button" style="display: none">Add new private board</button>
     {% endif %}
     <button type="button" id="manual-sync">Refresh</button>
+    <br>
+    <small style="text-align: center;">Syncs every minute...</small>
 </div>
 
 {% if user %}

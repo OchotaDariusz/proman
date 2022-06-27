@@ -4,7 +4,7 @@ import {domManager} from "../view/domManager.js";
 import {cardsManager} from "./cardsManager.js";
 import {showPopup} from "../popup.js";
 import {columnsManager} from "./columnsManager.js";
-import {socket} from "../main.js";
+// import {socket} from "../main.js";
 
 export let boardsManager = {
     loadBoards: async function (userId) {
