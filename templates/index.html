@@ -70,7 +70,7 @@
 
 <script type="module" src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
 <script>
-    const socket = io();
+    const socket = new Server();
     socket.connect('https://proman-code-cool.herokuapp.com/');
 </script>
 <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
