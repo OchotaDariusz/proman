@@ -21,7 +21,6 @@
           integrity="sha384-u5J7JghGz0qUrmEsWzBQkfvc8nK3fUT7DCaQzNQ+q4oEXhGSx+P2OqjWsfIRB8QT" crossorigin="anonymous">
 
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
-    <script type="module" src="{{ url_for('static', filename='js/main.js') }}" defer></script>
 </head>
 <body>
 
@@ -55,6 +54,7 @@
         <button type="button" id="add-board-button-login">Add new board</button>
         <button type="button" id="add-private-board-button" style="display: none">Add new private board</button>
     {% endif %}
+    <button type="button" id="manual-sync">Refresh</button>
 </div>
 
 {% if user %}
@@ -67,6 +67,13 @@
     </script>
 {% endif %}
 
+
+<script type="module" src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
+<script>
+    const socket = io();
+    socket.connect('http://127.0.0.1:5000/');
+</script>
+<script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
 <script type="module" src="{{ url_for('static', filename='js/popup.js') }}"></script>
 </body>
 

@@ -229,3 +229,7 @@ section.board {
         opacity: 0;
     }
 }
+
+.dragged {
+    opacity: 0.5;
+}

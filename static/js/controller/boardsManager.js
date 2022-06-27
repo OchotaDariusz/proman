@@ -4,6 +4,7 @@ import {domManager} from "../view/domManager.js";
 import {cardsManager} from "./cardsManager.js";
 import {showPopup} from "../popup.js";
 import {columnsManager} from "./columnsManager.js";
+import {socket} from "../main.js";
 
 export let boardsManager = {
     loadBoards: async function (userId) {
@@ -36,29 +37,58 @@ export let boardsManager = {
                 domManager.addEventListener(
                     `.board-title[data-board-id="${board.id}"]`,
                     "click",
-                    event => {
-                        renameBoardTitle(event, board);
+                    async event => {
+                        await renameBoardTitle(event, board);
                     }
                 );
             }
             domManager.addEventListener(`.fas.fa-trash-alt.board[data-board-id="${board.id}"]`,
                 "click",
                 async () => {
-                    if (confirm("Are you sure you want to delete this board?")) {
-                        await dataHandler.deleteBoard(board.id, userId)
-                        const boardToRemove = document.querySelector(`.board[data-board-id="${board.id}"]`);
-                        boardToRemove.remove();
-                    }
+                    await removeBoard(board);
+                    socket.send('a');
                 });
         }
     },
-    createBoard: async function(boardTitle, public_private) {
+    createBoard: async function (boardTitle, public_private) {
         await dataHandler.createNewBoard(boardTitle, public_private, userId);
-        const sectionsBoard = document.querySelectorAll('section.board');
-        sectionsBoard.forEach(section => section.remove());
+        socket.send('a');
+    },
+    reloadBoards: async function (userId) {
+        const boardsIdToLoad = checkForLoadedContent();
+
+        const boards = document.querySelectorAll('section.board');
+        boards.forEach(board => {
+            board.remove();
+        });
         await this.loadBoards(userId);
+
+        boardsIdToLoad.forEach(boardId => {
+            loadBoardContent(boardId);
+            domManager.toggleCSSClasses(`.fas[data-board-id="${boardId}"]`, 'fa-chevron-down', 'fa-chevron-up');
+        });
     },
 };
+
+async function removeBoard(board) {
+    if (confirm("Are you sure you want to delete this board?")) {
+        await dataHandler.deleteBoard(board.id, userId)
+        const boardToRemove = document.querySelector(`.board[data-board-id="${board.id}"]`);
+        boardToRemove.remove();
+    }
+}
+
+function checkForLoadedContent() {
+    const openedBoardsId = [];
+    const boardsContent = document.querySelectorAll('div.board-columns');
+    boardsContent.forEach(boardContent => {
+        if (boardContent.hasChildNodes()) {
+            openedBoardsId.push(boardContent.dataset.boardId);
+            boardContent.innerHTML = '';
+        }
+    });
+    return openedBoardsId
+}
 
 function showHideButtonHandler(clickEvent) {
     const boardId = clickEvent.target.dataset.boardId;
@@ -72,7 +102,7 @@ function showHideButtonHandler(clickEvent) {
 
 async function loadBoardContent(boardId) {
     await columnsManager.loadColumns(boardId);
-    cardsManager.loadCards(boardId);
+    await cardsManager.loadCards(boardId);
 }
 
 const saveNewBoardTitle = async (submitEvent, event, board, newTitle, newTitleForm) => {
@@ -84,8 +114,8 @@ const saveNewBoardTitle = async (submitEvent, event, board, newTitle, newTitleFo
     domManager.addEventListener(
         `.board-title[data-board-id="${board.id}"]`,
         "click",
-        event => {
-            renameBoardTitle(event, board);
+        async event => {
+            await renameBoardTitle(event, board);
         }
     );
 };
@@ -98,8 +128,10 @@ async function renameBoardTitle(event, board) {
     newTitle.focus();
     newTitleForm.addEventListener('submit', async submitEvent => {
         await saveNewBoardTitle(submitEvent, event, board, newTitle, newTitleForm);
+        socket.send('a');
     });
     newTitleForm.addEventListener('focusout', async submitEvent => {
         await saveNewBoardTitle(submitEvent, event, board, newTitle, newTitleForm);
+        socket.send('a');
     });
 }

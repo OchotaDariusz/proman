@@ -7,12 +7,12 @@ export let domManager = {
             console.error("could not find such html element: " + parentIdentifier);
         }
     },
-    addEventListener(parentIdentifier, eventType, eventHandler, once=false) {
-        const parent = document.querySelector(parentIdentifier);
+    addEventListener(elementIdentifier, eventType, eventHandler, once=false) {
+        const parent = document.querySelector(elementIdentifier);
         if (parent) {
             parent.addEventListener(eventType, eventHandler, {once: once});
         } else {
-            console.error("could not find such html element: " + parentIdentifier);
+            console.error("could not find such html element: " + elementIdentifier);
         }
     },
     removeAllChildren(parentIdentifier) {
@@ -27,4 +27,5 @@ export let domManager = {
         const element = document.querySelector(elementIdentifier);
         cls.map(cl => element.classList.toggle(cl));
     }
+
 };
