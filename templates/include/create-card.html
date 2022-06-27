@@ -1,0 +1,14 @@
+<div class="popup" id="create-card">
+    <form class="form" id="create-card-form">
+        <div class="popup-header">Create New Card</div>
+        <label for="card-title">Card<br>Title:</label>
+        <input id="card-title" type="text" required>
+        <label for="card-status">Status:</label>
+        <select name="card-status" id="card-status">
+            {% for status in all_statuses %}
+                <option value="{{ status.id }}">{{ status.title }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Create</button>
+    </form>
+</div>

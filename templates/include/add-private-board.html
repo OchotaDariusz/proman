@@ -1,0 +1,9 @@
+<div class="popup" id="add-private-board-popup">
+    <form class="form" id="add-private-board">
+        <div class="popup-header">Add new private board</div>
+        <label for="private-board-title">Board title:</label>
+        <input id="private-board-title" type="text" required placeholder="New private board">
+        <input type="hidden" name="userid" value="{{ user.id }}">
+        <button type="submit">Add</button>
+    </form>
+</div>

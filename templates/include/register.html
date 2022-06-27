@@ -1,0 +1,12 @@
+<div class="popup" id="register-popup">
+    <form class="form" action="{{ url_for('post_register_page') }}" id="register">
+        <div class="popup-header">Register</div>
+        <label for="username-register">Username<br>(e-mail):</label>
+        <input id="username-register" type="text" required>
+        <label for="password-register">Password:</label>
+        <input id="password-register" type="password" minlength="6" placeholder="Min. 6 characters long" required>
+        <label for="password2-register">Password(repeat):</label>
+        <input id="password2-register" type="password" minlength="6" placeholder="Repeat your password..." required>
+        <button type="submit">Register</button>
+    </form>
+</div>
