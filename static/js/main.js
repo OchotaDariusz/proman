@@ -17,12 +17,6 @@ function init() {
         console.log(msg);
         boardsManager.reloadBoards(userId);
     });
-
-    // //auto sync
-    // const minute = 60000
-    // setTimeout(() => {
-    //     boardsManager.reloadBoards(userId);
-    // }, minute);
 }
 
 init();
