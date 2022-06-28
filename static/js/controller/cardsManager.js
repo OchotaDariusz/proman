@@ -4,18 +4,28 @@ import {domManager} from "../view/domManager.js";
 import {socket} from "../main.js";
 
 export let cardsManager = {
-    loadCards: async function (boardId) {
-        const cards = await dataHandler.getCardsByBoardId(userId, boardId);
+    loadCards: async function (boardId, archived = false) {
+        let cards;
+        if (archived === true) {
+            cards = await dataHandler.getArchivedCardsByBoardId(userId, boardId);
+        } else {
+            cards = await dataHandler.getCardsByBoardId(userId, boardId);
+        }
         for (let card of cards) {
             const cardBuilder = htmlFactory(htmlTemplates.card);
             const content = cardBuilder(card);
             domManager.addChild(`.board-column-content[data-column-id="${card.status_id}"][data-board-id="${boardId}"]`, content)
-            domManager.addEventListener(
-                `.card-remove[data-card-id="${card.id}"]`,
-                "click",
-                deleteButtonHandler
-            );
             if (card.user_id === userId) {
+                domManager.addEventListener(
+                    `.card-remove[data-card-id="${card.id}"]`,
+                    "click",
+                    deleteButtonHandler
+                );
+                domManager.addEventListener(
+                    `.card-archive[data-card-id="${card.id}"]`,
+                    "click",
+                    archiveButtonHandler
+                );
                 domManager.addEventListener(
                     `.card-title[data-card-board-id="${card.board_id}"][data-card-id="${card.id}"]`,
                     "click",
@@ -24,16 +34,7 @@ export let cardsManager = {
                     }
                 );
             }
-            domManager.addEventListener(
-                `.card[data-card-id="${card.id}"]`,
-                "dragstart",
-                dragStartHandler
-            )
-            domManager.addEventListener(
-                `.card[data-card-id="${card.id}"]`,
-                "dragend",
-                dragEndHandler
-            )
+            initDragAndDrop(boardId, cards);
         }
     },
     createCard: async function (cardTitle, boardId, statusId) {
@@ -44,6 +45,15 @@ export let cardsManager = {
         socket.send('a');
     },
 };
+
+async function archiveButtonHandler(clickEvent) {
+    const boardId = clickEvent.target.parentElement.dataset.cardBoardId;
+    const cardId = clickEvent.target.parentElement.dataset.cardId;
+    if (confirm('Are you sure want to archive/unarchive that card?')) {
+        await dataHandler.archiveCard(boardId, cardId, userId);
+        socket.send('a');
+    }
+}
 
 async function deleteButtonHandler(clickEvent) {
     const boardId = clickEvent.target.parentElement.dataset.cardBoardId;
@@ -86,11 +96,53 @@ async function renameCardTitle(event, card) {
     });
 }
 
-function dragStartHandler(dragStartEvent){
-    dragStartEvent.target.classList.add("dragged");
+function initDragAndDrop(boardId, cardsFromDB) {
+    let current = null;
+    let cards = document.querySelectorAll(`.card[data-card-board-id="${boardId}"]`);
+    for (let card of cards) {
+        card.ondragstart = (e) => {
+            current = card;
+            console.log(current);
+            card.classList.add("dragged");
+        };
+        card.ondragend = () => {
+            card.classList.remove("dragged");
+            current = null;
+        };
+        card.ondragenter = () => {
+            if (card !== current) {
+                card.classList.add("drop-zone");
+            }
+        };
+        card.ondragover = (e) => {
+            e.preventDefault();
+        }
+        card.ondragleave = () => {
+            if (card !== current) {
+                card.classList.remove("drop-zone");
+            }
+        };
+        card.ondrop = (e) => {
+            e.preventDefault();
+            if (card !== current) {
+                let [currentStatus, currentOrder] = get_card_status_and_order(current.dataset.cardId, cardsFromDB);
+                let [dropStatus, dropOrder] = get_card_status_and_order(card.dataset.cardId, cardsFromDB);
+                if (currentStatus === dropStatus && currentOrder < dropOrder) {
+                    card.parentElement.insertBefore(current, card.nextSibling);
+                    update_cards(cardsFromDB,)
+
+                } else {
+                    card.parentElement.insertBefore(current, card);
+                }
+            }
+        };
+    }
 }
 
-function dragEndHandler(dragEndEvent){
-    dragEndEvent.target.classList.remove("dragged");
+function get_card_status_and_order(card_id, cards) {
+    for (let card of cards) {
+        if (card.id == card_id) {
+            return [card.status_id, card.card_order];
+        }
+    }
 }
-

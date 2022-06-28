@@ -61,11 +61,11 @@ section.board {
     font-size: 20px;
 }
 
-.board-title, .board-add, .board-toggle {
+.board-title, .board-add, .board-toggle, .board-toggle-archived {
     display: inline-block;
 }
 
-.fas.fa-trash-alt.board{
+.fas.fa-trash-alt.board {
     float: right;
     margin-top: 13px;
     cursor: pointer;
@@ -127,10 +127,19 @@ section.board {
     background: var(--status-4);
 }
 
+.card-archive {
+    display: block;
+    position: absolute;
+    top: 6px;
+    right: 20px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
 .card-remove {
     display: block;
     position: absolute;
-    top: 4px;
+    top: 6px;
     right: 4px;
     font-size: 12px;
     cursor: pointer;
@@ -232,6 +241,14 @@ section.board {
 
 .dragged {
     opacity: 0.5;
+}
+
+.drop-zone {
+    --border-radius: 6px;
+    --status-1: #590044;
+    --status-2: #594344;
+    --status-3: #525944;
+    --status-4: #085944;
 }
 
 .flashes {

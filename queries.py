@@ -53,11 +53,46 @@ def get_cards_for_board(user_id, board_id):
         SELECT cards.id, cards.board_id, cards.status_id, cards.title, cards.card_order, cards.user_id
         FROM cards
         JOIN boards on boards.id = cards.board_id
-        WHERE cards.board_id = %(board_id)s AND boards.public = TRUE
+        WHERE cards.board_id = %(board_id)s AND boards.public = TRUE AND cards.archived = FALSE
             OR cards.board_id = %(board_id)s AND boards.public = FALSE AND boards.user_id = %(user_id)s
+             AND cards.archived = FALSE
+        ORDER BY cards.card_order
         """, {"user_id": user_id, "board_id": board_id})
 
     return matching_cards
+
+
+def get_archived_cards_for_board(user_id, board_id):
+    matching_cards = data_manager.execute_select(
+        """
+        SELECT cards.id, cards.board_id, cards.status_id, cards.title, cards.card_order, cards.user_id
+        FROM cards
+        JOIN boards on boards.id = cards.board_id
+        WHERE cards.board_id = %(board_id)s AND boards.public = TRUE AND cards.archived = TRUE
+            OR cards.board_id = %(board_id)s AND boards.public = FALSE AND boards.user_id = %(user_id)s
+             AND cards.archived = TRUE
+        ORDER BY cards.card_order
+        """, {"user_id": user_id, "board_id": board_id})
+
+    return matching_cards
+
+
+def get_card(card_id, user_id):
+    return data_manager.execute_select(
+        """SELECT *
+        FROM cards
+        WHERE id = %(card_id)s AND user_id = %(user_id)s
+        """, variables={'card_id': card_id, 'user_id': user_id}, fetchall=False)
+
+
+def archive_card(board_id, card_id, user_id):
+    card = get_card(card_id, user_id)
+    print(card)
+    archive = "TRUE" if card['archived'] is False else "FALSE"
+    data_manager.execute_statement(
+        """UPDATE cards
+        SET archived = """ + archive + " WHERE id = %(card_id)s AND board_id = %(board_id)s AND user_id = %(user_id)s",
+        variables={'card_id': card_id, 'board_id': board_id, 'user_id': user_id})
 
 
 def get_user_by_username(username):
@@ -103,8 +138,8 @@ def add_new_board(board_title, public, user_id):
 def create_new_card(board_id, card_details, user_id):
     data_manager.execute_statement(
         """
-        INSERT INTO cards(board_id, status_id, title, card_order, user_id)
-        VALUES(%(board_id)s, %(status_id)s, %(title)s, 1, %(user_id)s)
+        INSERT INTO cards(board_id, status_id, title, card_order, user_id, archived)
+        VALUES(%(board_id)s, %(status_id)s, %(title)s, 1, %(user_id)s, FALSE)
         """
         , variables={'board_id': board_id, 'status_id': card_details['statusId'],
                      'title': card_details['cardTitle'], 'user_id': user_id})
@@ -138,9 +173,20 @@ def delete_board(board_id, user_id):
 
 
 def rename_card(board_id, card_id, new_card_title, user_id):
-    return data_manager.execute_statement(
+    data_manager.execute_statement(
         """UPDATE cards
         SET title = %(new_card_title)s
         WHERE id = %(card_id)s AND board_id = %(board_id)s AND user_id = %(user_id)s
         """, variables={'card_id': card_id, 'board_id': board_id, 'new_card_title': new_card_title,
                         'user_id': user_id})
+
+
+def update_cards(board_id, user_id, cards_details):
+    for card in cards_details:
+        data_manager.execute_statement(
+            """UPDATE cards
+            SET status_id = %(status)s, card_order = %(order)s
+            WHERE id = %(id)s AND board_id = %(board_id)s AND user_id = %(user_id)s 
+            """, variables={'id': card['id'], 'status': card['stutus_id'],
+                            'order': card['card_order'], 'board_id': board_id, 'user_id': user_id}
+        )

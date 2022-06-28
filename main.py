@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, redirect, session, request, jsonify
+from flask import Flask, render_template, url_for, session, request, jsonify
 from flask_socketio import SocketIO
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -64,6 +64,13 @@ def get_cards_for_board(user_id: int, board_id: int):
 def post_create_card_for_board(user_id: int, board_id: int):
     card_details = request.get_json()
     return queries.create_new_card(board_id, card_details, user_id)
+
+
+@app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards", methods=['PATCH'])
+@json_response
+def patch_update_cards_for_board(user_id: int, board_id: int):
+    cards_details = request.get_json()
+    return queries.update_cards(board_id, user_id, cards_details)
 
 
 @app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/<int:card_id>", methods=['DELETE'])
@@ -138,6 +145,18 @@ def delete_board(user_id: int, board_id: int):
 def patch_rename_card(user_id: int, board_id: int, card_id: int):
     new_card_title = request.get_json()
     return queries.rename_card(board_id, card_id, new_card_title['cardTitle'], user_id)
+
+
+@app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/<int:card_id>/archive", methods=['PATCH'])
+@json_response
+def patch_archive_card(user_id: int, board_id: int, card_id: int):
+    return queries.archive_card(board_id, card_id, user_id)
+
+
+@app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/archived")
+@json_response
+def get_archived_cards_for_board(user_id: int, board_id: int):
+    return queries.get_archived_cards_for_board(user_id, board_id)
 
 
 @socketio.on('message')

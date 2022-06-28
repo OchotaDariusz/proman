@@ -29,7 +29,8 @@ function boardBuilder(board) {
                     <button class="board-add" data-board-id="${board.id}">Add Card</button>
                     <button class="board-toggle" data-board-id="${board.id}">
                         <i class="fas fa-chevron-down" data-board-id="${board.id}"></i>
-                   </button>`;
+                    </button>
+                    <button class="board-toggle-archived" data-board-id="${board.id}">Show archived</button>`;
     boardComponent += (board.user_id === userId) ? `<button class="fas fa-trash-alt board" data-board-id="${board.id}"></button>` : ``;
     boardComponent += `</div>
                 <div class="board-columns" data-board-id="${board.id}"></div> 
@@ -38,8 +39,8 @@ function boardBuilder(board) {
 }
 
 function cardBuilder(card) {
-    let cardComponent = `<div class="card" data-card-id="${card.id}" data-card-board-id="${card.board_id}">`;
-    cardComponent += (card.user_id === userId) ? `<div class="card-remove" data-card-id="${card.id}" data-card-board-id="${card.board_id}"><i class="fas fa-trash-alt" data-card-board-id="${card.board_id}"></i></div>` : ``;
+    let cardComponent = `<div class="card" data-card-id="${card.id}" data-card-board-id="${card.board_id}" draggable="true">`;
+    cardComponent += (card.user_id === userId) ? `<div class="card-archive" data-card-id="${card.id}" data-card-board-id="${card.board_id}"><i class="fa-solid fa-box-archive"></i></div><div class="card-remove" data-card-id="${card.id}" data-card-board-id="${card.board_id}"><i class="fas fa-trash-alt" data-card-board-id="${card.board_id}"></i></div>` : ``;
     cardComponent += `<div class="card-title" data-card-board-id="${card.board_id}" data-card-id="${card.id}">${card.title}</div>`;
     return cardComponent;
 }
