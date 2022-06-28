@@ -233,3 +233,14 @@ section.board {
 .dragged {
     opacity: 0.5;
 }
+
+.flashes {
+    display: none;
+}
+
+.flash {
+    background-color: white;
+    list-style-type: none;
+    padding: 20px;
+    text-align: center;
+}

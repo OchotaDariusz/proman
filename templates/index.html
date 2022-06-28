@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,6 +23,7 @@
 
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
+
 <body>
 
 {% include 'include/login.html' %}
@@ -29,6 +31,7 @@
 {% include 'include/create-card.html' %}
 {% include 'include/addBoard.html' %}
 {% include 'include/add-private-board.html' %}
+{% include 'include/flashes.html' %}
 
 <h1>ProMan</h1>
 
@@ -55,8 +58,6 @@
         <button type="button" id="add-private-board-button" style="display: none">Add new private board</button>
     {% endif %}
     <button type="button" id="manual-sync">Refresh</button>
-{#    <br>#}
-{#    <small style="text-align: center;">Syncs every minute...</small>#}
 </div>
 
 {% if user %}

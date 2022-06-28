@@ -85,7 +85,7 @@ def post_register_page():
             queries.add_new_user(new_user)
             session['username'] = username
             user = queries.get_user_by_username(username)
-            return jsonify({'user_id': user['id']}), 200
+            return jsonify({'user_id': user['id'], 'message': 'Successfully registered, You are now logged in.'}), 200
         return jsonify({'message': "Passwords do not match!"}), 403
     return jsonify({'message': "User already exists!"}), 409
 
@@ -98,7 +98,7 @@ def post_login_page():
     user = queries.get_user_by_username(username)
     if user and auth.verify_password(password, user['password']):
         session['username'] = username
-        return jsonify({'user_id': user['id']}), 200
+        return jsonify({'user_id': user['id'], 'message': 'Successfully logged in.'}), 200
     return jsonify({'message': 'Wrong credentials!'}), 401
 
 

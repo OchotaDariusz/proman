@@ -37,6 +37,9 @@ let sectionsBoard;
 
 const logoutButton = document.querySelector('.logout');
 
+const flashes = document.querySelector('.flashes');
+const flashList = document.querySelector('.flash');
+
 export const showPopup = element => {
     element.classList.add('fade-in');
     element.classList.remove('fade-out');
@@ -98,7 +101,11 @@ loginForm.addEventListener('submit', event => {
         password: passwordLogin.value
     };
 
-    sendRequest(urlTarget, userData);
+    sendRequest(urlTarget, userData)
+        .then(() => {
+            showPopup(flashes);
+        })
+        .catch(err => console.log(err));
 
     loginForm.reset();
     closePopup(loginPopup);
@@ -114,7 +121,11 @@ registerForm.addEventListener('submit', event => {
         password: passwordRegister.value,
         password2: passwordRegister2.value
     };
-    sendRequest(urlTarget, userData);
+    sendRequest(urlTarget, userData)
+        .then(() => {
+            showPopup(flashes);
+        })
+        .catch(err => console.log(err));
 
     registerForm.reset();
     closePopup(registerPopup);
@@ -209,7 +220,11 @@ async function logout() {
 
     const urlTarget = `${window.location.href}logout`;
 
-    sendRequest(urlTarget);
+    sendRequest(urlTarget)
+        .then(() => {
+            showPopup(flashes);
+        })
+        .catch(err => console.log(err));
 
     await reRenderDomForLoggedOutUser();
 }
@@ -222,12 +237,17 @@ async function sendRequest(urlTarget, userData=null) {
         },
         body: JSON.stringify(userData),
     })
-        .then(response => response.json())
+        .then(response => {
+            flashList.innerHTML = '';
+            return response.json()
+        })
         .then(async response => {
             if (response.hasOwnProperty('user_id')) {
                 await login(response);
+                flashList.innerHTML = `<li>${response['message']}</li>`;
             } else {
                 console.log(response['message']);
+                flashList.innerHTML = `<li>${response['message']}</li>`;
             }
         })
         .catch(error => console.error(error));
