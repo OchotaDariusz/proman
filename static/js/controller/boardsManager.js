@@ -4,7 +4,7 @@ import {domManager} from "../view/domManager.js";
 import {cardsManager} from "./cardsManager.js";
 import {showPopup} from "../popup.js";
 import {columnsManager} from "./columnsManager.js";
-// import {socket} from "../main.js";
+import {socket} from "../main.js";
 
 export let boardsManager = {
     loadBoards: async function (userId) {
@@ -46,13 +46,13 @@ export let boardsManager = {
                 "click",
                 async () => {
                     await removeBoard(board);
-                    // socket.send('a');
+                    socket.send('a');
                 });
         }
     },
     createBoard: async function (boardTitle, public_private) {
         await dataHandler.createNewBoard(boardTitle, public_private, userId);
-        // socket.send('a');
+        socket.send('a');
     },
     reloadBoards: async function (userId) {
         const boardsIdToLoad = checkForLoadedContent();
@@ -128,10 +128,10 @@ async function renameBoardTitle(event, board) {
     newTitle.focus();
     newTitleForm.addEventListener('submit', async submitEvent => {
         await saveNewBoardTitle(submitEvent, event, board, newTitle, newTitleForm);
-        // socket.send('a');
+        socket.send('a');
     });
     newTitleForm.addEventListener('focusout', async submitEvent => {
         await saveNewBoardTitle(submitEvent, event, board, newTitle, newTitleForm);
-        // socket.send('a');
+        socket.send('a');
     });
 }

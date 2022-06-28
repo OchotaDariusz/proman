@@ -1,7 +1,7 @@
 import {boardsManager} from "./controller/boardsManager.js";
 
-// export const socket = io();
-// socket.connect('https://proman-code-cool.herokuapp.com/');
+export const socket = io();
+socket.connect('https://proman-code-cool.herokuapp.com/');
 
 function init() {
     boardsManager.loadBoards(userId);
@@ -12,17 +12,17 @@ function init() {
         boardsManager.reloadBoards(userId);
     });
 
-    // //live sync
-    // socket.on('message', function(msg) {
-    //     console.log(msg);
-    //     boardsManager.reloadBoards(userId);
-    // });
-
-    //auto sync
-    const minute = 60000
-    setTimeout(() => {
+    //live sync
+    socket.on('message', function(msg) {
+        console.log(msg);
         boardsManager.reloadBoards(userId);
-    }, minute);
+    });
+
+    // //auto sync
+    // const minute = 60000
+    // setTimeout(() => {
+    //     boardsManager.reloadBoards(userId);
+    // }, minute);
 }
 
 init();

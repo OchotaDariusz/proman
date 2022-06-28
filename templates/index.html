@@ -55,8 +55,8 @@
         <button type="button" id="add-private-board-button" style="display: none">Add new private board</button>
     {% endif %}
     <button type="button" id="manual-sync">Refresh</button>
-    <br>
-    <small style="text-align: center;">Syncs every minute...</small>
+{#    <br>#}
+{#    <small style="text-align: center;">Syncs every minute...</small>#}
 </div>
 
 {% if user %}
@@ -70,7 +70,7 @@
 {% endif %}
 
 
-{#<script type="module" src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>#}
+<script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
 <script type="module" src="{{ url_for('static', filename='js/main.js') }}" async></script>
 <script type="module" src="{{ url_for('static', filename='js/popup.js') }}" async></script>
 </body>

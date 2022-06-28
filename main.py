@@ -1,5 +1,5 @@
 from flask import Flask, render_template, url_for, redirect, session, request, jsonify
-# from flask_socketio import SocketIO
+from flask_socketio import SocketIO
 from flask_cors import CORS
 from dotenv import load_dotenv
 
@@ -11,7 +11,7 @@ import queries
 mimetypes.add_type('application/javascript', '.js')
 app = Flask(__name__)
 CORS(app)
-# socketio = SocketIO(app)
+socketio = SocketIO(app)
 app.secret_key = '9232b3e6634925ae2e068c9810e53f4c10faef6e4ff17fb4'
 load_dotenv()
 
@@ -140,14 +140,14 @@ def patch_rename_card(user_id: int, board_id: int, card_id: int):
     return queries.rename_card(board_id, card_id, new_card_title['cardTitle'], user_id)
 
 
-# @socketio.on('message')
-# def handle_msg(msg):
-#     socketio.send('Syncing...')
+@socketio.on('message')
+def handle_msg(msg):
+    socketio.send('Syncing...')
 
 
 def main():
-    app.run()
-    # socketio.run(app)
+    # app.run()
+    socketio.run(app)
 
     # Serving the favicon
     with app.app_context():
