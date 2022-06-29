@@ -176,6 +176,14 @@ def create_new_column(board_id, column_title):
         """, variables={'title': column_title, 'board_id': board_id})
 
 
+def rename_column(board_id, column_id, column_title):
+    data_manager.execute_statement(
+        """UPDATE statuses
+        SET title = %(column_title)s
+        WHERE bound_to_board = %(board_id)s AND id = %(column_id)s
+        """, variables={'board_id': board_id, 'column_id': column_id, 'column_title': column_title})
+
+
 def delete_board(board_id, user_id):
     data_manager.execute_statement(
         """

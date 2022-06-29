@@ -21,7 +21,6 @@ def index():
     """
     This is a one-pager which shows all the boards and cards
     """
-    # all_statuses = queries.get_statuses()
     return render_template('index.html', user=queries.get_user_by_username(session.get('username')))
 
 
@@ -140,6 +139,16 @@ def delete_status(board_id):
         return jsonify({'message': 'Successfully removed.'})
     else:
         return jsonify({'message': 'You cannot remove this column'})
+
+
+@app.route('/api/statuses/<int:board_id>', methods=['PATCH'])
+def patch_rename_status(board_id):
+    data = request.get_json()
+    if int(data['columnId']) > 4:
+        queries.rename_column(board_id, data['columnId'], data['columnTitle'])
+        return jsonify({'message': 'Successfully renamed.'})
+    else:
+        return jsonify({'message': 'You cannot rename this column'})
 
 
 @app.route("/api/users/<int:user_id>/boards", methods=["POST"])

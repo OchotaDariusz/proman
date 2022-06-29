@@ -3,6 +3,7 @@ import {htmlFactory, htmlTemplates} from "../view/htmlFactory.js";
 import {domManager} from "../view/domManager.js";
 import {boardsManager} from "./boardsManager.js";
 import {showPopup, loginPopup, flashes, flashList} from "../popup.js";
+import {socket} from "../main.js";
 
 export let columnsManager = {
     loadColumns: async function (boardId) {
@@ -36,6 +37,13 @@ export let columnsManager = {
                 `.board-column-remove[data-column-id="${column.id}"][data-board-id="${boardId}"]`,
                 "click",
                 removeColumnButtonHandler
+            );
+            domManager.addEventListener(
+                `.board-column-title[data-column-id="${column.id}"][data-board-id="${boardId}"]`,
+                "click",
+                event => {
+                    renameColumnTitle(event, column.id, boardId)
+                }
             );
         }
     },
@@ -74,4 +82,42 @@ function removeColumnButtonHandler(clickEvent) {
     } else {
         showPopup(loginPopup);
     }
+}
+
+
+const saveNewColumnTitle = (submitEvent, event, columnId, boardId, newTitle, newTitleForm) => {
+    submitEvent.preventDefault();
+    event.target.innerText = newTitle.value;
+    newTitleForm.outerHTML = event.target.outerHTML;
+    dataHandler.renameColumn(columnId, boardId, newTitle.value)
+        .then(response => {
+            flashList.innerHTML = '';
+            flashList.innerHTML = `<li>${response.message}</li>`;
+            showPopup(flashes);
+        })
+        .catch(err => console.log(err));
+    newTitleForm.reset();
+    domManager.addEventListener(
+        `.board-column-title[data-column-id="${columnId}"][data-board-id="${boardId}"]`,
+        "click",
+        async event => {
+            await renameColumnTitle(event, columnId, boardId);
+        }
+    );
+};
+
+function renameColumnTitle(event, columnId, boardId) {
+    const title = event.target.innerText;
+    event.target.outerHTML = `<form id="new-title-form" style="display: inline-block;" class="board-column-title"><input type="text" id="new-title" maxlength="25" value="${title}"></form>`;
+    const newTitleForm = document.querySelector('#new-title-form');
+    const newTitle = document.querySelector('#new-title');
+    newTitle.focus();
+    newTitleForm.addEventListener('submit', submitEvent => {
+        saveNewColumnTitle(submitEvent, event, columnId, boardId, newTitle, newTitleForm);
+        socket.send('a');
+    });
+    newTitleForm.addEventListener('focusout', submitEvent => {
+        saveNewColumnTitle(submitEvent, event, columnId, boardId, newTitle, newTitleForm);
+        socket.send('a');
+    });
 }

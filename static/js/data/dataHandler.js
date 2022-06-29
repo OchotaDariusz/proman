@@ -23,11 +23,17 @@ export let dataHandler = {
     },
     createNewBoard: async function (boardTitle, public_private, userId) {
         // creates new board, saves it and calls the callback function with its data
-        return await apiPost(`/api/users/${userId}/boards`, {"boardTitle": boardTitle, "public_private": public_private});
+        return await apiPost(`/api/users/${userId}/boards`, {
+            "boardTitle": boardTitle,
+            "public_private": public_private
+        });
     },
     createNewCard: async function (cardTitle, boardId, statusId, userId) {
         // creates new card, saves it and calls the callback function with its data
-        return await apiPost(`/api/users/${userId}/boards/${boardId}/cards`, {"cardTitle": cardTitle, "statusId": statusId});
+        return await apiPost(`/api/users/${userId}/boards/${boardId}/cards`, {
+            "cardTitle": cardTitle,
+            "statusId": statusId
+        });
     },
     updateCards: async function (boardId, userId, cards) {
         // updates status and/or order after a card was dragged and dropped for all neighbor cards
@@ -54,7 +60,13 @@ export let dataHandler = {
     },
     removeColumn: async function (boardId, columnId) {
         return await apiDelete(`/api/statuses/${boardId}`, {'columnId': columnId})
-    }
+    },
+    renameColumn: async function (columnId, boardId, columnTitle) {
+        return await apiPatch(`/api/statuses/${boardId}`, {
+            "columnTitle": columnTitle,
+            "columnId": columnId
+        });
+    },
 };
 
 async function apiGet(url) {
@@ -79,7 +91,7 @@ async function apiPost(url, payload) {
     }
 }
 
-async function apiDelete(url, payload={"message": "empty"}) {
+async function apiDelete(url, payload = {"message": "empty"}) {
     let response = await fetch(url, {
         method: "DELETE",
         headers: {
@@ -95,7 +107,7 @@ async function apiDelete(url, payload={"message": "empty"}) {
 async function apiPut(url) {
 }
 
-async function apiPatch(url, payload={"message": "empty"}) {
+async function apiPatch(url, payload = {"message": "empty"}) {
     let response = await fetch(url, {
         method: "PATCH",
         headers: {
