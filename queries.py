@@ -218,11 +218,11 @@ def rename_card(board_id, card_id, new_card_title, user_id):
 
 
 def update_cards(board_id, user_id, cards_details):
-    for card in cards_details:
+    for card in cards_details['cards']:
         data_manager.execute_statement(
             """UPDATE cards
             SET status_id = %(status)s, card_order = %(order)s
             WHERE id = %(id)s AND board_id = %(board_id)s AND user_id = %(user_id)s 
-            """, variables={'id': card['id'], 'status': card['stutus_id'],
-                            'order': card['card_order'], 'board_id': board_id, 'user_id': user_id}
+            """, variables={'id': int(card['id']), 'status': int(card['status_id']),
+                            'order': int(card['card_order']), 'board_id': board_id, 'user_id': user_id}
         )

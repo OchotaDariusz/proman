@@ -35,8 +35,8 @@ export let cardsManager = {
                     }
                 );
             }
-            initDragAndDrop(boardId, cards);
         }
+        initDragAndDrop(boardId, cards);
     },
     createCard: function (cardTitle, boardId, statusId) {
         dataHandler.createNewCard(cardTitle, boardId, statusId, userId)
@@ -123,53 +123,80 @@ function renameCardTitle(event, card) {
     });
 }
 
-function initDragAndDrop(boardId, cardsFromDB) {
+function initDragAndDrop(boardId) {
     let current = null;
     let cards = document.querySelectorAll(`.card[data-card-board-id="${boardId}"]`);
     for (let card of cards) {
         card.ondragstart = (e) => {
             current = card;
-            console.log(current);
             card.classList.add("dragged");
         };
         card.ondragend = () => {
             card.classList.remove("dragged");
             current = null;
         };
-        card.ondragenter = () => {
+        /*card.ondragenter = () => {
             if (card !== current) {
                 card.classList.add("drop-zone");
             }
-        };
+        };*/
         card.ondragover = (e) => {
             e.preventDefault();
-        }
+        }/*
         card.ondragleave = () => {
             if (card !== current) {
                 card.classList.remove("drop-zone");
             }
-        };
-        card.ondrop = (e) => {
+        };*/
+        card.ondrop = async function(e) {
             e.preventDefault();
             if (card !== current) {
-                let [currentStatus, currentOrder] = get_card_status_and_order(current.dataset.cardId, cardsFromDB);
-                let [dropStatus, dropOrder] = get_card_status_and_order(card.dataset.cardId, cardsFromDB);
-                if (currentStatus === dropStatus && currentOrder < dropOrder) {
+                if (current.dataset.statusId === card.dataset.statusId &&
+                    current.dataset.order < card.dataset.order) {
                     card.parentElement.insertBefore(current, card.nextSibling);
-                    update_cards(cardsFromDB,)
-
                 } else {
                     card.parentElement.insertBefore(current, card);
                 }
+                const newCardData = updateCardData(current, card, cards);
+                await dataHandler.updateCards(boardId, userId, newCardData)
             }
         };
     }
 }
 
-function get_card_status_and_order(card_id, cards) {
-    for (let card of cards) {
-        if (card.id == card_id) {
-            return [card.status_id, card.card_order];
+function updateCardData(current, dropZoneCard, cards) {
+    let newCardData;
+    let currentStatusId = current.dataset.statusId;
+    let currentOrder = current.dataset.order;
+    let dropStatusId = dropZoneCard.dataset.statusId;
+    let dropOrder = dropZoneCard.dataset.order;
+    current.dataset.order = dropOrder;
+    current.dataset.statusId = dropStatusId;
+    newCardData = [{'id': current.dataset.cardId, 'status_id': dropStatusId, 'card_order': dropOrder }]
+    cards.forEach(c => {
+        if ((currentStatusId === dropStatusId && currentOrder < dropOrder && c.dataset.order <= dropOrder ||
+                currentStatusId !== dropStatusId) &&
+            c.dataset.statusId === currentStatusId &&
+            c.dataset.order > currentOrder &&
+            c !== current) {
+            c.dataset.order = String(Number(c.dataset.order) - 1);
+            newCardData.push({
+                'id': c.dataset.cardId,
+                'status_id': c.dataset.statusId,
+                'card_order': c.dataset.order
+            })
+        } else if ((currentStatusId === dropStatusId && c.dataset.statusId === currentStatusId && c.dataset.order < currentOrder ||
+                currentStatusId !== dropStatusId && c.dataset.statusId === dropStatusId) &&
+            c.dataset.order >= dropOrder &&
+            c !== current) {
+            c.dataset.order = String(Number(c.dataset.order) + 1);
+            newCardData.push({
+                'id': c.dataset.cardId,
+                'status_id': c.dataset.statusId,
+                'card_order': c.dataset.order
+            })
         }
-    }
+    })
+    console.log(newCardData);
+    return newCardData;
 }

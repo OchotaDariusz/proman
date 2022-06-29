@@ -250,12 +250,8 @@ section.board {
     opacity: 0.5;
 }
 
-.drop-zone {
-    --border-radius: 6px;
-    --status-1: #590044;
-    --status-2: #594344;
-    --status-3: #525944;
-    --status-4: #085944;
+.card .drop-zone {
+    border: 10px solid #b8fc26;
 }
 
 .flashes {
