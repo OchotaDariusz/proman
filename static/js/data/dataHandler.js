@@ -6,11 +6,11 @@ export let dataHandler = {
         // the board is retrieved and then the callback function is called with the board
         return await apiGet(`/api/users/${userId}/boards/${boardId}`);
     },
-    getStatuses: async function () {
-        return await apiGet(`/api/statuses`);
+    getStatuses: async function (boardId) {
+        return await apiGet(`/api/statuses/${boardId}`);
     },
     getStatus: async function (statusId) {
-        return await apiGet(`/api/statuses/${statusId}`);
+        return await apiGet(`/api/status/${statusId}`);
     },
     getCardsByBoardId: async function (userId, boardId) {
         return await apiGet(`/api/users/${userId}/boards/${boardId}/cards/`);
@@ -49,6 +49,12 @@ export let dataHandler = {
     renameCard: async function (boardId, cardId, cardTitle, userId) {
         await apiPatch(`/api/users/${userId}/boards/${boardId}/cards/${cardId}`, {"cardTitle": cardTitle});
     },
+    createColumn: async function (boardId, columnTitle) {
+        await apiPost(`/api/statuses/${boardId}`, {"columnTitle": columnTitle});
+    },
+    removeColumn: async function (boardId, columnId) {
+        return await apiDelete(`/api/statuses/${boardId}`, {'columnId': columnId})
+    }
 };
 
 async function apiGet(url) {
@@ -73,9 +79,13 @@ async function apiPost(url, payload) {
     }
 }
 
-async function apiDelete(url) {
+async function apiDelete(url, payload={"message": "empty"}) {
     let response = await fetch(url, {
         method: "DELETE",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload),
     });
     if (response.ok) {
         return await response.json();

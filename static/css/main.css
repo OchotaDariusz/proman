@@ -99,7 +99,14 @@ section.board {
 }
 
 .board-column-title {
+    display: inline-block;
     text-align: center;
+}
+
+.board-column-remove {
+    display: inline-block;
+    float: right;
+    cursor: pointer;
 }
 
 .card {
@@ -266,7 +273,6 @@ section.board {
 .tooltip {
     position: relative;
     display: inline-block;
-    border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
 }
 
 /* Tooltip text */

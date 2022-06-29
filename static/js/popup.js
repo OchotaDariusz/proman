@@ -1,7 +1,8 @@
-import {cardsManager} from "./controller/cardsManager.js";
-import {boardsManager} from "./controller/boardsManager.js";
+import { cardsManager } from "./controller/cardsManager.js";
+import { boardsManager } from "./controller/boardsManager.js";
+import { columnsManager } from "./controller/columnsManager.js";
 
-const loginPopup = document.querySelector('#login-popup');
+export const loginPopup = document.querySelector('#login-popup');
 const loginButton = document.querySelector('#login-button');
 const loginForm = document.querySelector('#login');
 const usernameLogin = document.querySelector('#username-login');
@@ -14,10 +15,14 @@ const usernameRegister = document.querySelector('#username-register');
 const passwordRegister = document.querySelector('#password-register');
 const passwordRegister2 = document.querySelector('#password2-register');
 
-const createCardPopup = document.querySelector('#create-card');
+export const createCardPopup = document.querySelector('#create-card');
 const createCardForm = document.querySelector('#create-card-form');
 const createCardTitle = document.querySelector('#card-title');
-const createCardStatus = document.querySelector('#card-status');
+export const createCardStatus = document.querySelector('#card-status');
+
+export const createColumnPopup = document.querySelector('#create-column')
+const createColumnForm = document.querySelector('#create-column-form')
+const createColumnTitle = document.querySelector('#column-title')
 
 const addBoardPopup = document.querySelector('#add-board-popup');
 let addBoardButton = document.querySelector('#add-board-button');
@@ -37,8 +42,8 @@ let sectionsBoard;
 
 const logoutButton = document.querySelector('.logout');
 
-const flashes = document.querySelector('.flashes');
-const flashList = document.querySelector('.flash');
+export const flashes = document.querySelector('.flashes');
+export const flashList = document.querySelector('.flash');
 
 export const showPopup = element => {
     element.classList.add('fade-in');
@@ -147,6 +152,21 @@ if (createCardForm) {
     });
 }
 
+if (createColumnForm) {
+    createColumnForm.addEventListener('submit', async event => {
+        event.preventDefault();
+
+        const columnTitle = createColumnTitle.value;
+        const boardId = localStorage.getItem('boardId');
+        localStorage.removeItem('boardId');
+
+        await columnsManager.createColumn(columnTitle, boardId);
+
+        createColumnForm.reset();
+        closePopup(createColumnPopup);
+    });
+}
+
 function addBoardButtonAddEvent() {
     addBoardButton = document.querySelector('#add-board-button');
     addBoardButton = removeAllEventListeners(addBoardButton);
@@ -155,11 +175,11 @@ function addBoardButtonAddEvent() {
     });
 }
 
-if(addBoardButton) {
+if (addBoardButton) {
     addBoardButtonAddEvent();
 }
 
-addBoardPopup.addEventListener('submit', async event => {
+addBoardForm.addEventListener('submit', async event => {
     event.preventDefault();
 
     const boardTitle = addBoardTitle.value;
@@ -173,7 +193,7 @@ if (addPrivateBoardButton) {
     });
 }
 
-addPrivateBoardPopup.addEventListener('submit', async event => {
+addPrivateBoardForm.addEventListener('submit', async event => {
     event.preventDefault();
 
     const boardTitle = addPrivateBoardTitle.value;
@@ -229,7 +249,7 @@ async function logout() {
     await reRenderDomForLoggedOutUser();
 }
 
-async function sendRequest(urlTarget, userData=null) {
+async function sendRequest(urlTarget, userData = null) {
     fetch(urlTarget, {
         method: "POST",
         headers: {

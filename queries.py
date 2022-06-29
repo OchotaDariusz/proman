@@ -154,13 +154,26 @@ def remove_card(board_id, card_id, user_id):
         """, variables={'board_id': board_id, 'card_id': card_id, 'user_id': user_id})
 
 
-def get_statuses():
+def get_statuses(board_id=0):
     return data_manager.execute_select(
         """
         SELECT * FROM statuses
-        ;
-        """
-    )
+        WHERE bound_to_board = 0 OR bound_to_board = %(board_id)s
+        """, variables={'board_id': board_id})
+
+
+def remove_column(board_id, column_id):
+    data_manager.execute_statement(
+        """DELETE FROM statuses CASCADE
+        WHERE bound_to_board = %(board_id)s AND id = %(column_id)s
+        """, variables={'board_id': board_id, 'column_id': column_id})
+
+
+def create_new_column(board_id, column_title):
+    data_manager.execute_statement(
+        """INSERT INTO statuses(title, bound_to_board)
+        VALUES (%(title)s, %(board_id)s)
+        """, variables={'title': column_title, 'board_id': board_id})
 
 
 def delete_board(board_id, user_id):

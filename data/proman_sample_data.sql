@@ -27,15 +27,16 @@ DROP TABLE IF EXISTS users;
 ---
 
 CREATE TABLE statuses (
-    id       SERIAL PRIMARY KEY     NOT NULL,
-    title    VARCHAR(200)           NOT NULL
+    id              SERIAL PRIMARY KEY  NOT NULL,
+    title           VARCHAR(200)        NOT NULL,
+    bound_to_board  INTEGER             NOT NULL
 );
 
 CREATE TABLE boards (
-    id          SERIAL PRIMARY KEY  NOT NULL,
-    title       VARCHAR(200)        NOT NULL,
-    public      BOOLEAN             NOT NULL,
-    user_id     INTEGER             NOT NULL
+    id              SERIAL PRIMARY KEY  NOT NULL,
+    title           VARCHAR(200)        NOT NULL,
+    public          BOOLEAN             NOT NULL,
+    user_id         INTEGER             NOT NULL
 );
 
 CREATE TABLE cards (
@@ -58,10 +59,10 @@ CREATE TABLE users (
 --- insert data
 ---
 
-INSERT INTO statuses(title) VALUES ('new');
-INSERT INTO statuses(title) VALUES ('in progress');
-INSERT INTO statuses(title) VALUES ('testing');
-INSERT INTO statuses(title) VALUES ('done');
+INSERT INTO statuses(title, bound_to_board) VALUES ('new', 0);
+INSERT INTO statuses(title, bound_to_board) VALUES ('in progress', 0);
+INSERT INTO statuses(title, bound_to_board) VALUES ('testing', 0);
+INSERT INTO statuses(title, bound_to_board) VALUES ('done', 0);
 
 INSERT INTO boards(title, public, user_id) VALUES ('Board 1', TRUE, 1);
 INSERT INTO boards(title, public, user_id) VALUES ('Board 2', TRUE, 1);
@@ -90,7 +91,7 @@ ALTER TABLE ONLY cards
     ADD CONSTRAINT fk_cards_board_id FOREIGN KEY (board_id) REFERENCES boards(id);
 
 ALTER TABLE ONLY cards
-    ADD CONSTRAINT fk_cards_status_id FOREIGN KEY (status_id) REFERENCES statuses(id);
+    ADD CONSTRAINT fk_cards_status_id FOREIGN KEY (status_id) REFERENCES statuses(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY boards
     ADD CONSTRAINT fk_boards_user_id FOREIGN KEY (user_id) REFERENCES users(id);

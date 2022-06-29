@@ -2,7 +2,7 @@ import {dataHandler} from "../data/dataHandler.js";
 import {htmlFactory, htmlTemplates} from "../view/htmlFactory.js";
 import {domManager} from "../view/domManager.js";
 import {cardsManager} from "./cardsManager.js";
-import {showPopup} from "../popup.js";
+import {showPopup, loginPopup, createCardPopup, createCardStatus, createColumnPopup} from "../popup.js";
 import {columnsManager} from "./columnsManager.js";
 import {socket} from "../main.js";
 
@@ -29,7 +29,13 @@ export let boardsManager = {
                 `.board-add[data-board-id="${board.id}"]`,
                 "click",
                 () => {
-                    showLoginForm(board)
+                    addCardButtonHandler(board)
+                });
+            await domManager.addEventListener(
+                `.board-add-column[data-board-id="${board.id}"]`,
+                "click",
+                () => {
+                    addColumnButtonHandler(board)
                 });
             if (board.user_id === userId) {
                 domManager.addEventListener(
@@ -68,14 +74,29 @@ export let boardsManager = {
     },
 };
 
-function showLoginForm(board) {
-    const createCardPopup = document.querySelector('#create-card');
+function addCardButtonHandler(board) {
     localStorage.setItem('boardId', board.id);
     if (userId === 0) {
-        const loginPopup = document.querySelector('#login-popup');
         showPopup(loginPopup);
     } else {
+        dataHandler.getStatuses(board.id)
+            .then(statuses => {
+                createCardStatus.innerHTML = '';
+                statuses.forEach(status => {
+                    createCardStatus.innerHTML += `<option value="${status.id}">${status.title}</option>`
+                });
+            })
+            .catch(err => console.log(err));
         showPopup(createCardPopup);
+    }
+}
+
+function addColumnButtonHandler(board) {
+    localStorage.setItem('boardId', board.id);
+    if (userId === 0) {
+        showPopup(loginPopup);
+    } else {
+        showPopup(createColumnPopup);
     }
 }
 

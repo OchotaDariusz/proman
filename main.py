@@ -21,9 +21,8 @@ def index():
     """
     This is a one-pager which shows all the boards and cards
     """
-    all_statuses = queries.get_statuses()
-    return render_template('index.html', user=queries.get_user_by_username(session.get('username')),
-                           all_statuses=all_statuses)
+    # all_statuses = queries.get_statuses()
+    return render_template('index.html', user=queries.get_user_by_username(session.get('username')))
 
 
 @app.route("/api/users/<int:user_id>/boards")
@@ -115,16 +114,32 @@ def post_logout():
     return jsonify({'message': 'Logged out successfully.'}), 200
 
 
-@app.route('/api/statuses')
+@app.route('/api/statuses/<int:board_id>')
 @json_response
-def get_statuses():
-    return queries.get_statuses()
+def get_statuses(board_id):
+    return queries.get_statuses(board_id)
 
 
-@app.route('/api/statuses/<int:status_id>')
+@app.route('/api/status/<int:status_id>')
 @json_response
 def get_status(status_id):
     return queries.get_card_status(status_id)
+
+
+@app.route('/api/statuses/<int:board_id>', methods=['POST'])
+def post_new_status(board_id):
+    data = request.get_json()
+    queries.create_new_column(board_id, data['columnTitle'])
+
+
+@app.route('/api/statuses/<int:board_id>', methods=['DELETE'])
+def delete_status(board_id):
+    data = request.get_json()
+    if int(data['columnId']) > 4:
+        queries.remove_column(board_id, data['columnId'])
+        return jsonify({'message': 'Successfully removed.'})
+    else:
+        return jsonify({'message': 'You cannot remove this column'})
 
 
 @app.route("/api/users/<int:user_id>/boards", methods=["POST"])

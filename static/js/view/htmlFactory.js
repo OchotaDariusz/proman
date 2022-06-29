@@ -30,6 +30,7 @@ function boardBuilder(board) {
                     <button class="board-toggle" data-board-id="${board.id}">
                         <i class="fas fa-chevron-down" data-board-id="${board.id}"></i>
                     </button>
+                    <button class="board-add-column" data-board-id="${board.id}">Add Column</button>
                     <button class="board-toggle-archived" data-board-id="${board.id}">Show archived</button>`;
     boardComponent += (board.user_id === userId) ? `<button class="fas fa-trash-alt board" data-board-id="${board.id}"></button>` : ``;
     boardComponent += `</div>
@@ -47,7 +48,8 @@ function cardBuilder(card) {
 
 function columnBuilder(column, boardId) {
     return `<div class="board-column" data-column-id="${column.id}" data-board-id="${boardId}">
-                <div class="board-column-title">${column.title}</div>
-                <div class="board-column-content" data-column-id="${column.id}" data-board-id="${boardId}"> </div>
+                <div class="board-column-title" data-column-id="${column.id}" data-board-id="${boardId}">${column.title}</div>
+                <div class="board-column-remove" data-column-id="${column.id}" data-board-id="${boardId}"><div class="tooltip"><span class="tooltiptext" data-column-id="${column.id}" data-board-id="${boardId}">Remove</span><i class="fa-solid fa-circle-xmark" data-column-id="${column.id}" data-board-id="${boardId}"></i></div></div>
+                <div class="board-column-content" data-column-id="${column.id}" data-board-id="${boardId}"></div>
             </div>`
 }
