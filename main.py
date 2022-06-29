@@ -43,7 +43,8 @@ def get_board(user_id: int, board_id: int):
 @json_response
 def patch_rename_board(user_id: int, board_id: int):
     board_title = request.get_json()
-    return queries.rename_board(board_id, board_title['boardTitle'], user_id)
+    queries.rename_board(board_id, board_title['boardTitle'], user_id)
+    return {'message': 'Successfully renamed.'}
 
 
 @app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/")
@@ -61,7 +62,8 @@ def get_cards_for_board(user_id: int, board_id: int):
 @json_response
 def post_create_card_for_board(user_id: int, board_id: int):
     card_details = request.get_json()
-    return queries.create_new_card(board_id, card_details, user_id)
+    queries.create_new_card(board_id, card_details, user_id)
+    return {'message': 'Successfully created.'}
 
 
 @app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards", methods=['PATCH'])
@@ -74,7 +76,8 @@ def patch_update_cards_for_board(user_id: int, board_id: int):
 @app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/<int:card_id>", methods=['DELETE'])
 @json_response
 def delete_card_from_board(user_id: int, board_id: int, card_id: int):
-    return queries.remove_card(board_id, card_id, user_id)
+    queries.remove_card(board_id, card_id, user_id)
+    return {'message': 'Successfully removed.'}
 
 
 @app.route('/register', methods=['POST'])
@@ -126,29 +129,33 @@ def get_status(status_id):
 
 
 @app.route('/api/statuses/<int:board_id>', methods=['POST'])
+@json_response
 def post_new_status(board_id):
     data = request.get_json()
     queries.create_new_column(board_id, data['columnTitle'])
+    return {'message': 'Successfully created.'}
 
 
 @app.route('/api/statuses/<int:board_id>', methods=['DELETE'])
+@json_response
 def delete_status(board_id):
     data = request.get_json()
     if int(data['columnId']) > 4:
         queries.remove_column(board_id, data['columnId'])
-        return jsonify({'message': 'Successfully removed.'})
+        return {'message': 'Successfully removed.'}
     else:
-        return jsonify({'message': 'You cannot remove this column'})
+        return {'message': 'You cannot remove this column'}
 
 
 @app.route('/api/statuses/<int:board_id>', methods=['PATCH'])
+@json_response
 def patch_rename_status(board_id):
     data = request.get_json()
     if int(data['columnId']) > 4:
         queries.rename_column(board_id, data['columnId'], data['columnTitle'])
-        return jsonify({'message': 'Successfully renamed.'})
+        return {'message': 'Successfully renamed.'}
     else:
-        return jsonify({'message': 'You cannot rename this column'})
+        return {'message': 'You cannot rename this column'}
 
 
 @app.route("/api/users/<int:user_id>/boards", methods=["POST"])
@@ -156,25 +163,29 @@ def patch_rename_status(board_id):
 def post_new_board(user_id):
     data = request.get_json()
     queries.add_new_board(data['boardTitle'], data['public_private'], user_id)
+    return {'message': 'Successfully created.'}
 
 
 @app.route("/api/users/<int:user_id>/boards/<int:board_id>", methods=["DELETE"])
 @json_response
 def delete_board(user_id: int, board_id: int):
-    return queries.delete_board(board_id, user_id)
+    queries.delete_board(board_id, user_id)
+    return {'message': 'Successfully removed.'}
 
 
 @app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/<int:card_id>", methods=['PATCH'])
 @json_response
 def patch_rename_card(user_id: int, board_id: int, card_id: int):
     new_card_title = request.get_json()
-    return queries.rename_card(board_id, card_id, new_card_title['cardTitle'], user_id)
+    queries.rename_card(board_id, card_id, new_card_title['cardTitle'], user_id)
+    return {'message': 'Successfully renamed.'}
 
 
 @app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/<int:card_id>/archive", methods=['PATCH'])
 @json_response
 def patch_archive_card(user_id: int, board_id: int, card_id: int):
-    return queries.archive_card(board_id, card_id, user_id)
+    queries.archive_card(board_id, card_id, user_id)
+    return {'message': 'Operation done.'}
 
 
 @app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/archived")

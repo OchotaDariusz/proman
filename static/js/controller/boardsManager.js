@@ -2,7 +2,15 @@ import {dataHandler} from "../data/dataHandler.js";
 import {htmlFactory, htmlTemplates} from "../view/htmlFactory.js";
 import {domManager} from "../view/domManager.js";
 import {cardsManager} from "./cardsManager.js";
-import {showPopup, loginPopup, createCardPopup, createCardStatus, createColumnPopup} from "../popup.js";
+import {
+    showPopup,
+    loginPopup,
+    createCardPopup,
+    createCardStatus,
+    createColumnPopup,
+    flashList,
+    flashes
+} from "../popup.js";
 import {columnsManager} from "./columnsManager.js";
 import {socket} from "../main.js";
 
@@ -41,21 +49,27 @@ export let boardsManager = {
                 domManager.addEventListener(
                     `.board-title[data-board-id="${board.id}"]`,
                     "click",
-                    async event => {
-                        await renameBoardTitle(event, board);
+                    event => {
+                        renameBoardTitle(event, board);
                     }
                 );
                 domManager.addEventListener(`.fas.fa-trash-alt.board[data-board-id="${board.id}"]`,
                     "click",
-                    async () => {
-                        await removeBoard(board);
+                    () => {
+                        removeBoard(board);
                         socket.send('a');
                     });
             }
         }
     },
-    createBoard: async function (boardTitle, public_private) {
-        await dataHandler.createNewBoard(boardTitle, public_private, userId);
+    createBoard: function (boardTitle, public_private) {
+        dataHandler.createNewBoard(boardTitle, public_private, userId)
+            .then(response => {
+                flashList.innerHTML = '';
+                flashList.innerHTML = `<li>${response.message}</li>`;
+                showPopup(flashes);
+            })
+            .catch(err => console.log(err));
         socket.send('a');
     },
     reloadBoards: async function (userId) {
@@ -100,9 +114,15 @@ function addColumnButtonHandler(board) {
     }
 }
 
-async function removeBoard(board) {
+function removeBoard(board) {
     if (confirm("Are you sure you want to delete this board?")) {
-        await dataHandler.deleteBoard(board.id, userId)
+        dataHandler.deleteBoard(board.id, userId)
+            .then(response => {
+                flashList.innerHTML = '';
+                flashList.innerHTML = `<li>${response.message}</li>`;
+                showPopup(flashes);
+            })
+            .catch(err => console.log(err));
         const boardToRemove = document.querySelector(`.board[data-board-id="${board.id}"]`);
         boardToRemove.remove();
     }
@@ -150,17 +170,23 @@ async function loadBoardContentArchived(boardId) {
     await cardsManager.loadCards(boardId, true);
 }
 
-const saveNewBoardTitle = async (submitEvent, event, board, newTitle, newTitleForm) => {
+const saveNewBoardTitle = (submitEvent, event, board, newTitle, newTitleForm) => {
     submitEvent.preventDefault();
     event.target.innerText = newTitle.value;
     newTitleForm.outerHTML = event.target.outerHTML;
-    await dataHandler.renameBoard(board.id, newTitle.value, userId);
+    dataHandler.renameBoard(board.id, newTitle.value, userId)
+        .then(response => {
+            flashList.innerHTML = '';
+            flashList.innerHTML = `<li>${response.message}</li>`;
+            showPopup(flashes);
+        })
+        .catch(err => console.log(err));
     newTitleForm.reset();
     domManager.addEventListener(
         `.board-title[data-board-id="${board.id}"]`,
         "click",
-        async event => {
-            await renameBoardTitle(event, board);
+        event => {
+            renameBoardTitle(event, board);
         }
     );
 };

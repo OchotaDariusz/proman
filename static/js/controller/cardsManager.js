@@ -2,6 +2,7 @@ import {dataHandler} from "../data/dataHandler.js";
 import {htmlFactory, htmlTemplates} from "../view/htmlFactory.js";
 import {domManager} from "../view/domManager.js";
 import {socket} from "../main.js";
+import {flashes, flashList, showPopup} from "../popup.js";
 
 export let cardsManager = {
     loadCards: async function (boardId, archived = false) {
@@ -37,39 +38,65 @@ export let cardsManager = {
             initDragAndDrop(boardId, cards);
         }
     },
-    createCard: async function (cardTitle, boardId, statusId) {
-        await dataHandler.createNewCard(cardTitle, boardId, statusId, userId);
+    createCard: function (cardTitle, boardId, statusId) {
+        dataHandler.createNewCard(cardTitle, boardId, statusId, userId)
+            .then(response => {
+                flashList.innerHTML = '';
+                flashList.innerHTML = `<li>${response.message}</li>`;
+                showPopup(flashes);
+            })
+            .catch(err => console.log(err));
         const cards = document.querySelectorAll('.card');
         cards.forEach(card => card.remove());
-        await this.loadCards(boardId);
-        socket.send('a');
+        this.loadCards(boardId)
+            .then(() => {
+                socket.send('a');
+            })
+            .catch(err => console.log(err));
     },
 };
 
-async function archiveButtonHandler(clickEvent) {
-    const boardId = clickEvent.target.parentElement.dataset.cardBoardId;
-    const cardId = clickEvent.target.parentElement.dataset.cardId;
+function archiveButtonHandler(clickEvent) {
+    const boardId = clickEvent.target.dataset.cardBoardId;
+    const cardId = clickEvent.target.dataset.cardId;
     if (confirm('Are you sure want to archive/unarchive that card?')) {
-        await dataHandler.archiveCard(boardId, cardId, userId);
+        dataHandler.archiveCard(boardId, cardId, userId)
+            .then(response => {
+                flashList.innerHTML = '';
+                flashList.innerHTML = `<li>${response.message}</li>`;
+                showPopup(flashes);
+            })
+            .catch(err => console.log(err));
         socket.send('a');
     }
 }
 
-async function deleteButtonHandler(clickEvent) {
-    const boardId = clickEvent.target.parentElement.dataset.cardBoardId;
-    const cardId = clickEvent.target.parentElement.dataset.cardId;
+function deleteButtonHandler(clickEvent) {
+    const boardId = clickEvent.target.dataset.cardBoardId;
+    const cardId = clickEvent.target.dataset.cardId;
     if (confirm('Are you sure want to delete that card?')) {
-        await dataHandler.deleteCard(boardId, cardId, userId);
-        clickEvent.target.parentElement.parentElement.remove();
+        dataHandler.deleteCard(boardId, cardId, userId)
+            .then(response => {
+                flashList.innerHTML = '';
+                flashList.innerHTML = `<li>${response.message}</li>`;
+                showPopup(flashes);
+            })
+            .catch(err => console.log(err));
         socket.send('a');
     }
 }
 
-const saveNewCardTitle = async (submitEvent, event, card, newTitle, newTitleForm) => {
+const saveNewCardTitle = (submitEvent, event, card, newTitle, newTitleForm) => {
     submitEvent.preventDefault();
     event.target.innerText = newTitle.value;
     newTitleForm.outerHTML = event.target.outerHTML;
-    await dataHandler.renameCard(card.board_id, card.id, newTitle.value, userId)
+    dataHandler.renameCard(card.board_id, card.id, newTitle.value, userId)
+        .then(response => {
+            flashList.innerHTML = '';
+            flashList.innerHTML = `<li>${response.message}</li>`;
+            showPopup(flashes);
+        })
+        .catch(err => console.log(err));
     newTitleForm.reset();
     domManager.addEventListener(
         `.card-title[data-card-board-id="${card.board_id}"][data-card-id="${card.id}"]`,
@@ -80,18 +107,18 @@ const saveNewCardTitle = async (submitEvent, event, card, newTitle, newTitleForm
     );
 };
 
-async function renameCardTitle(event, card) {
+function renameCardTitle(event, card) {
     const title = event.target.innerText;
     event.target.outerHTML = `<form id="new-card-title-form" style="display: inline-block;" class="card-title"><input type="text" id="new-card-title" value="${title}"><button type="submit">save</button></form>`;
     const newTitleForm = document.querySelector('#new-card-title-form');
     const newTitle = document.querySelector('#new-card-title');
     newTitle.focus();
-    newTitleForm.addEventListener('submit', async submitEvent => {
-        await saveNewCardTitle(submitEvent, event, card, newTitle, newTitleForm);
+    newTitleForm.addEventListener('submit', submitEvent => {
+        saveNewCardTitle(submitEvent, event, card, newTitle, newTitleForm);
         socket.send('a');
     });
-    newTitleForm.addEventListener('focusout', async submitEvent => {
-        await saveNewCardTitle(submitEvent, event, card, newTitle, newTitleForm);
+    newTitleForm.addEventListener('focusout', submitEvent => {
+        saveNewCardTitle(submitEvent, event, card, newTitle, newTitleForm);
         socket.send('a');
     });
 }

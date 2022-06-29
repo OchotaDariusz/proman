@@ -47,9 +47,15 @@ export let columnsManager = {
             );
         }
     },
-    createColumn: async function (columnTitle, boardId) {
-        await dataHandler.createColumn(boardId, columnTitle);
-        await boardsManager.reloadBoards(userId);
+    createColumn: function (columnTitle, boardId) {
+        dataHandler.createColumn(boardId, columnTitle)
+            .then(response => {
+                flashList.innerHTML = '';
+                flashList.innerHTML = `<li>${response.message}</li>`;
+                showPopup(flashes);
+            })
+            .catch(err => console.log(err));
+        boardsManager.reloadBoards(userId);
     },
 }
 

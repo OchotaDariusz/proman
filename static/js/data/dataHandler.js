@@ -53,10 +53,10 @@ export let dataHandler = {
         return await apiDelete(`/api/users/${userId}/boards/${boardId}`);
     },
     renameCard: async function (boardId, cardId, cardTitle, userId) {
-        await apiPatch(`/api/users/${userId}/boards/${boardId}/cards/${cardId}`, {"cardTitle": cardTitle});
+        return await apiPatch(`/api/users/${userId}/boards/${boardId}/cards/${cardId}`, {"cardTitle": cardTitle});
     },
     createColumn: async function (boardId, columnTitle) {
-        await apiPost(`/api/statuses/${boardId}`, {"columnTitle": columnTitle});
+        return await apiPost(`/api/statuses/${boardId}`, {"columnTitle": columnTitle});
     },
     removeColumn: async function (boardId, columnId) {
         return await apiDelete(`/api/statuses/${boardId}`, {'columnId': columnId})

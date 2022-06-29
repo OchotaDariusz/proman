@@ -40,7 +40,7 @@ def get_board(user_id, board_id):
 
 
 def rename_board(board_id, board_title, user_id):
-    return data_manager.execute_statement(
+    data_manager.execute_statement(
         """UPDATE boards
         SET title = %(board_title)s
         WHERE id = %(board_id)s AND user_id = %(user_id)s
@@ -135,14 +135,29 @@ def add_new_board(board_title, public, user_id):
         , variables={'title': board_title, 'user_id': user_id})
 
 
+def get_last_card_order(board_id, status_id):
+    return data_manager.execute_select(
+        """SELECT card_order
+        FROM cards
+        WHERE board_id = %(board_id)s AND status_id = %(status_id)s
+        ORDER BY card_order DESC
+        """, variables={'board_id': board_id, 'status_id': status_id}, fetchall=False)
+
+
 def create_new_card(board_id, card_details, user_id):
+    last_order_number = get_last_card_order(board_id, card_details['statusId'])
+    if last_order_number is None:
+        last_order_number = 0
+    else:
+        last_order_number = int(last_order_number['card_order'])
     data_manager.execute_statement(
         """
         INSERT INTO cards(board_id, status_id, title, card_order, user_id, archived)
-        VALUES(%(board_id)s, %(status_id)s, %(title)s, 1, %(user_id)s, FALSE)
+        VALUES(%(board_id)s, %(status_id)s, %(title)s, %(card_order)s, %(user_id)s, FALSE)
         """
         , variables={'board_id': board_id, 'status_id': card_details['statusId'],
-                     'title': card_details['cardTitle'], 'user_id': user_id})
+                     'title': card_details['cardTitle'], 'user_id': user_id,
+                     'card_order': last_order_number + 1})
 
 
 def remove_card(board_id, card_id, user_id):
