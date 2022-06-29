@@ -106,8 +106,8 @@ const saveNewColumnTitle = (submitEvent, event, columnId, boardId, newTitle, new
     domManager.addEventListener(
         `.board-column-title[data-column-id="${columnId}"][data-board-id="${boardId}"]`,
         "click",
-        async event => {
-            await renameColumnTitle(event, columnId, boardId);
+        event => {
+            renameColumnTitle(event, columnId, boardId);
         }
     );
 };

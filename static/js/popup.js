@@ -1,6 +1,6 @@
-import { cardsManager } from "./controller/cardsManager.js";
-import { boardsManager } from "./controller/boardsManager.js";
-import { columnsManager } from "./controller/columnsManager.js";
+import {cardsManager} from "./controller/cardsManager.js";
+import {boardsManager} from "./controller/boardsManager.js";
+import {columnsManager} from "./controller/columnsManager.js";
 
 export const loginPopup = document.querySelector('#login-popup');
 const loginButton = document.querySelector('#login-button');

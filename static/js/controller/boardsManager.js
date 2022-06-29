@@ -33,19 +33,21 @@ export let boardsManager = {
                 showHideArchivedButtonHandler,
                 //true
             );
-            await domManager.addEventListener(
+            domManager.addEventListener(
                 `.board-add[data-board-id="${board.id}"]`,
                 "click",
                 () => {
                     addCardButtonHandler(board)
-                });
-            await domManager.addEventListener(
+                }
+            );
+            domManager.addEventListener(
                 `.board-add-column[data-board-id="${board.id}"]`,
                 "click",
                 () => {
                     addColumnButtonHandler(board)
-                });
-            if (board.user_id === userId) {
+                }
+            );
+            if (board['user_id'] === userId) {
                 domManager.addEventListener(
                     `.board-title[data-board-id="${board.id}"]`,
                     "click",
@@ -58,7 +60,8 @@ export let boardsManager = {
                     () => {
                         removeBoard(board);
                         socket.send('a');
-                    });
+                    }
+                );
             }
         }
     },
@@ -72,19 +75,21 @@ export let boardsManager = {
             .catch(err => console.log(err));
         socket.send('a');
     },
-    reloadBoards: async function (userId) {
+    reloadBoards: function (userId) {
         const boardsIdToLoad = checkForLoadedContent();
 
         const boards = document.querySelectorAll('section.board');
         boards.forEach(board => {
             board.remove();
         });
-        await this.loadBoards(userId);
-
-        boardsIdToLoad.forEach(boardId => {
-            loadBoardContent(boardId);
-            domManager.toggleCSSClasses(`.fas[data-board-id="${boardId}"]`, 'fa-chevron-down', 'fa-chevron-up');
-        });
+        this.loadBoards(userId)
+            .then(() => {
+                boardsIdToLoad.forEach(boardId => {
+                    loadBoardContent(boardId);
+                    domManager.toggleCSSClasses(`.fas[data-board-id="${boardId}"]`, 'fa-chevron-down', 'fa-chevron-up');
+                });
+            })
+            .catch(err => console.log(err));
     },
 };
 
@@ -160,14 +165,18 @@ function showHideArchivedButtonHandler(clickEvent) {
     domManager.toggleCSSClasses(`.fas[data-board-id="${boardId}"]`, 'fa-chevron-down', 'fa-chevron-up');
 }
 
-async function loadBoardContent(boardId) {
-    await columnsManager.loadColumns(boardId);
-    await cardsManager.loadCards(boardId);
+function loadBoardContent(boardId) {
+    columnsManager.loadColumns(boardId)
+        .then(() => cardsManager.loadCards(boardId))
+        .then(() => cardsManager.initDragAndDrop(boardId))
+        .catch(err => console.log(err));
 }
 
-async function loadBoardContentArchived(boardId) {
-    await columnsManager.loadColumns(boardId);
-    await cardsManager.loadCards(boardId, true);
+function loadBoardContentArchived(boardId) {
+    columnsManager.loadColumns(boardId)
+        .then(() => cardsManager.loadCards(boardId, true))
+        .then(() => cardsManager.initDragAndDrop(boardId))
+        .catch(err => console.log(err));
 }
 
 const saveNewBoardTitle = (submitEvent, event, board, newTitle, newTitleForm) => {
@@ -191,18 +200,18 @@ const saveNewBoardTitle = (submitEvent, event, board, newTitle, newTitleForm) =>
     );
 };
 
-async function renameBoardTitle(event, board) {
+function renameBoardTitle(event, board) {
     const title = event.target.innerText;
     event.target.outerHTML = `<form id="new-title-form" style="display: inline-block;" class="board-title"><input type="text" id="new-title" value="${title}"><button type="submit" style="margin-left: 15px;">save</button></form>`;
     const newTitleForm = document.querySelector('#new-title-form');
     const newTitle = document.querySelector('#new-title');
     newTitle.focus();
-    newTitleForm.addEventListener('submit', async submitEvent => {
-        await saveNewBoardTitle(submitEvent, event, board, newTitle, newTitleForm);
+    newTitleForm.addEventListener('submit', submitEvent => {
+        saveNewBoardTitle(submitEvent, event, board, newTitle, newTitleForm);
         socket.send('a');
     });
-    newTitleForm.addEventListener('focusout', async submitEvent => {
-        await saveNewBoardTitle(submitEvent, event, board, newTitle, newTitleForm);
+    newTitleForm.addEventListener('focusout', submitEvent => {
+        saveNewBoardTitle(submitEvent, event, board, newTitle, newTitleForm);
         socket.send('a');
     });
 }

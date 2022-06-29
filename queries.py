@@ -12,8 +12,7 @@ def get_card_status(status_id):
         SELECT * FROM statuses s
         WHERE s.id = %(status_id)s
         ;
-        """
-        , {"status_id": status_id})
+        """, {"status_id": status_id})
 
     return status
 
@@ -100,8 +99,7 @@ def get_user_by_username(username):
         """
         SELECT * FROM users
         WHERE username = %(username)s
-        """
-        , {'username': username}, fetchall=False)
+        """, {'username': username}, fetchall=False)
 
     return user
 
@@ -111,8 +109,7 @@ def get_user_by_user_id(user_id):
         """
         SELECT * FROM users
         WHERE id = %(user_id)s
-        """
-        , {'user_id': user_id}, fetchall=False)
+        """, {'user_id': user_id}, fetchall=False)
 
     return user
 
@@ -122,8 +119,7 @@ def add_new_user(new_user):
         """
         INSERT INTO users(username, password)
         VALUES(%(username)s, %(password)s)
-        """
-        , {'username': new_user['username'], 'password': new_user['password']})
+        """, {'username': new_user['username'], 'password': new_user['password']})
 
 
 def add_new_board(board_title, public, user_id):
@@ -131,8 +127,7 @@ def add_new_board(board_title, public, user_id):
     data_manager.execute_statement(
         """
         INSERT INTO boards (title, public, user_id)
-        VALUES(%(title)s, """ + public + ", %(user_id)s)"
-        , variables={'title': board_title, 'user_id': user_id})
+        VALUES(%(title)s, """ + public + ", %(user_id)s)", variables={'title': board_title, 'user_id': user_id})
 
 
 def get_last_card_order(board_id, status_id):
@@ -154,10 +149,9 @@ def create_new_card(board_id, card_details, user_id):
         """
         INSERT INTO cards(board_id, status_id, title, card_order, user_id, archived)
         VALUES(%(board_id)s, %(status_id)s, %(title)s, %(card_order)s, %(user_id)s, FALSE)
-        """
-        , variables={'board_id': board_id, 'status_id': card_details['statusId'],
-                     'title': card_details['cardTitle'], 'user_id': user_id,
-                     'card_order': last_order_number + 1})
+        """, variables={'board_id': board_id, 'status_id': card_details['statusId'],
+                        'title': card_details['cardTitle'], 'user_id': user_id,
+                        'card_order': last_order_number + 1})
 
 
 def remove_card(board_id, card_id, user_id):
@@ -201,11 +195,14 @@ def rename_column(board_id, column_id, column_title):
 
 def delete_board(board_id, user_id):
     data_manager.execute_statement(
+        """DELETE FROM statuses
+        WHERE bound_to_board = %(board_id)s
+        """, variables={'board_id': board_id})
+    data_manager.execute_statement(
         """
         DELETE FROM boards
         WHERE id=(%(board_id)s) AND user_id = %(user_id)s;
-        """
-        , variables={'board_id': board_id, 'user_id': user_id})
+        """, variables={'board_id': board_id, 'user_id': user_id})
 
 
 def rename_card(board_id, card_id, new_card_title, user_id):

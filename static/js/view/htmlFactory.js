@@ -32,7 +32,7 @@ function boardBuilder(board) {
                     </button>
                     <button class="board-add-column" data-board-id="${board.id}">Add Column</button>
                     <button class="board-toggle-archived" data-board-id="${board.id}">Show archived</button>`;
-    boardComponent += (board.user_id === userId) ? `<button class="fas fa-trash-alt board" data-board-id="${board.id}"></button>` : ``;
+    boardComponent += (board['user_id'] === userId) ? `<button class="fas fa-trash-alt board" data-board-id="${board.id}"></button>` : ``;
     boardComponent += `</div>
                 <div class="board-columns" data-board-id="${board.id}"></div> 
             </section>`;
@@ -41,7 +41,7 @@ function boardBuilder(board) {
 
 function cardBuilder(card) {
     let cardComponent = `<div class="card" data-card-id="${card.id}" data-card-board-id="${card.board_id}" data-status-id="${card.status_id}" data-order="${card.card_order}"`;
-    cardComponent += (card.user_id === userId) ? ` draggable="true"><div class="card-archive" data-card-id="${card.id}" data-card-board-id="${card.board_id}"><div class="tooltip"><span class="tooltiptext">Archive</span><i class="fa-solid fa-box-archive" data-card-id="${card.id}" data-card-board-id="${card.board_id}"></i></div></div><div class="card-remove" data-card-id="${card.id}" data-card-board-id="${card.board_id}"><div class="tooltip"><span class="tooltiptext">Remove</span><i class="fas fa-trash-alt" data-card-id="${card.id}" data-card-board-id="${card.board_id}"></i></div></div>` : `>`;
+    cardComponent += (card['user_id'] === userId) ? ` draggable="true"><div class="card-archive" data-card-id="${card.id}" data-card-board-id="${card.board_id}"><div class="tooltip"><span class="tooltiptext">Archive</span><i class="fa-solid fa-box-archive" data-card-id="${card.id}" data-card-board-id="${card.board_id}"></i></div></div><div class="card-remove" data-card-id="${card.id}" data-card-board-id="${card.board_id}"><div class="tooltip"><span class="tooltiptext">Remove</span><i class="fas fa-trash-alt" data-card-id="${card.id}" data-card-board-id="${card.board_id}"></i></div></div>` : `>`;
     cardComponent += `<div class="card-title" data-card-board-id="${card.board_id}" data-card-id="${card.id}">${card.title}</div>`;
     return cardComponent;
 }

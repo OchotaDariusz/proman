@@ -16,7 +16,7 @@ export let cardsManager = {
             const cardBuilder = htmlFactory(htmlTemplates.card);
             const content = cardBuilder(card);
             domManager.addChild(`.board-column-content[data-column-id="${card.status_id}"][data-board-id="${boardId}"]`, content)
-            if (card.user_id === userId) {
+            if (card['user_id'] === userId) {
                 domManager.addEventListener(
                     `.card-remove[data-card-id="${card.id}"]`,
                     "click",
@@ -36,7 +36,37 @@ export let cardsManager = {
                 );
             }
         }
-        initDragAndDrop(boardId, cards);
+    },
+    initDragAndDrop: function (boardId) {
+        let current = null;
+        let cards = document.querySelectorAll(`.card[data-card-board-id="${boardId}"]`);
+        for (let card of cards) {
+            card.ondragstart = () => {
+                current = card;
+                card.classList.add("dragged");
+            };
+            card.ondragend = () => {
+                card.classList.remove("dragged");
+                current = null;
+            };
+            card.ondragover = (e) => {
+                e.preventDefault();
+                card.ondrop = async function (e) {
+                    e.preventDefault();
+                    if (card !== current) {
+                        if (current.dataset.statusId === card.dataset.statusId &&
+                            current.dataset.order < card.dataset.order) {
+                            card.parentElement.insertBefore(current, card.nextSibling);
+                        } else {
+                            card.parentElement.insertBefore(current, card);
+                        }
+                        const newCardData = updateCardData(current, card, cards);
+                        await dataHandler.updateCards(boardId, userId, newCardData);
+                        socket.send('a');
+                    }
+                };
+            }
+        }
     },
     createCard: function (cardTitle, boardId, statusId) {
         dataHandler.createNewCard(cardTitle, boardId, statusId, userId)
@@ -53,7 +83,7 @@ export let cardsManager = {
                 socket.send('a');
             })
             .catch(err => console.log(err));
-    },
+    }
 };
 
 function archiveButtonHandler(clickEvent) {
@@ -123,47 +153,6 @@ function renameCardTitle(event, card) {
     });
 }
 
-function initDragAndDrop(boardId) {
-    let current = null;
-    let cards = document.querySelectorAll(`.card[data-card-board-id="${boardId}"]`);
-    for (let card of cards) {
-        card.ondragstart = (e) => {
-            current = card;
-            card.classList.add("dragged");
-        };
-        card.ondragend = () => {
-            card.classList.remove("dragged");
-            current = null;
-        };
-        /*card.ondragenter = () => {
-            if (card !== current) {
-                card.classList.add("drop-zone");
-            }
-        };*/
-        card.ondragover = (e) => {
-            e.preventDefault();
-        }/*
-        card.ondragleave = () => {
-            if (card !== current) {
-                card.classList.remove("drop-zone");
-            }
-        };*/
-        card.ondrop = async function(e) {
-            e.preventDefault();
-            if (card !== current) {
-                if (current.dataset.statusId === card.dataset.statusId &&
-                    current.dataset.order < card.dataset.order) {
-                    card.parentElement.insertBefore(current, card.nextSibling);
-                } else {
-                    card.parentElement.insertBefore(current, card);
-                }
-                const newCardData = updateCardData(current, card, cards);
-                await dataHandler.updateCards(boardId, userId, newCardData)
-            }
-        };
-    }
-}
-
 function updateCardData(current, dropZoneCard, cards) {
     let newCardData;
     let currentStatusId = current.dataset.statusId;
@@ -172,7 +161,7 @@ function updateCardData(current, dropZoneCard, cards) {
     let dropOrder = dropZoneCard.dataset.order;
     current.dataset.order = dropOrder;
     current.dataset.statusId = dropStatusId;
-    newCardData = [{'id': current.dataset.cardId, 'status_id': dropStatusId, 'card_order': dropOrder }]
+    newCardData = [{'id': current.dataset.cardId, 'status_id': dropStatusId, 'card_order': dropOrder}]
     cards.forEach(c => {
         if ((currentStatusId === dropStatusId && currentOrder < dropOrder && c.dataset.order <= dropOrder ||
                 currentStatusId !== dropStatusId) &&
