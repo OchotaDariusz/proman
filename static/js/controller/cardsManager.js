@@ -16,7 +16,7 @@ export let cardsManager = {
             const cardBuilder = htmlFactory(htmlTemplates.card);
             const content = cardBuilder(card);
             domManager.addChild(`.board-column-content[data-column-id="${card.status_id}"][data-board-id="${boardId}"]`, content)
-            if (card['user_id'] === userId) {
+            if (card['user_id']  === userId) {
                 domManager.addEventListener(
                     `.card-remove[data-card-id="${card.id}"]`,
                     "click",
@@ -51,20 +51,34 @@ export let cardsManager = {
             };
             card.ondragover = (e) => {
                 e.preventDefault();
-                card.ondrop = async function (e) {
-                    e.preventDefault();
-                    if (card !== current) {
-                        if (current.dataset.statusId === card.dataset.statusId &&
-                            current.dataset.order < card.dataset.order) {
-                            card.parentElement.insertBefore(current, card.nextSibling);
-                        } else {
-                            card.parentElement.insertBefore(current, card);
-                        }
-                        const newCardData = updateCardData(current, card, cards);
-                        await dataHandler.updateCards(boardId, userId, newCardData);
-                        socket.send('a');
+            };
+            card.ondrop = async function (e) {
+                e.preventDefault();
+                if (card !== current) {
+                    if (current.dataset.statusId === card.dataset.statusId &&
+                        current.dataset.order < card.dataset.order) {
+                        card.parentElement.insertBefore(current, card.nextSibling);
+                    } else {
+                        card.parentElement.insertBefore(current, card);
                     }
+                    const newCardData = updateCardData(current, card.dataset.statusId, card.dataset.order, cards);
+                    await dataHandler.updateCards(boardId, userId, newCardData);
+                    socket.send('a');
+                }
+            }
+        }
+        let columns = document.querySelectorAll(`.board-column-content[data-board-id="${boardId}"]`);
+        for (let column of columns) {
+            if (column.childNodes.length === 0) {
+                column.ondragover = (e) => {
+                    e.preventDefault();
                 };
+                column.ondrop = async function () {
+                    column.appendChild(current);
+                    const newCardData = updateCardData(current, column.dataset.columnId, 1, cards);
+                    await dataHandler.updateCards(boardId, userId, newCardData);
+                    socket.send('a');
+                }
             }
         }
     },
@@ -153,12 +167,10 @@ function renameCardTitle(event, card) {
     });
 }
 
-function updateCardData(current, dropZoneCard, cards) {
+function updateCardData(current, dropStatusId, dropOrder, cards) {
     let newCardData;
     let currentStatusId = current.dataset.statusId;
     let currentOrder = current.dataset.order;
-    let dropStatusId = dropZoneCard.dataset.statusId;
-    let dropOrder = dropZoneCard.dataset.order;
     current.dataset.order = dropOrder;
     current.dataset.statusId = dropStatusId;
     newCardData = [{'id': current.dataset.cardId, 'status_id': dropStatusId, 'card_order': dropOrder}]

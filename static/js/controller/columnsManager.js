@@ -14,26 +14,6 @@ export let columnsManager = {
             const content = columnBuilder(column, boardId);
             domManager.addChild(`.board-columns[data-board-id="${boardId}"]`, content);
             domManager.addEventListener(
-                `.board-columns[data-board-id="${boardId}"]`,
-                "dragenter",
-                dragEnterHandler
-            );
-            domManager.addEventListener(
-                `.board-columns[data-board-id="${boardId}"]`,
-                "dragover",
-                dragOverHandler
-            );
-            domManager.addEventListener(
-                `.board-columns[data-board-id="${boardId}"]`,
-                "dragover",
-                dragLeaveHandler
-            );
-            domManager.addEventListener(
-                `.board-columns[data-board-id="${boardId}"]`,
-                "drop",
-                dropHandler
-            );
-            domManager.addEventListener(
                 `.board-column-remove[data-column-id="${column.id}"][data-board-id="${boardId}"]`,
                 "click",
                 removeColumnButtonHandler
@@ -57,20 +37,6 @@ export let columnsManager = {
             .catch(err => console.log(err));
         boardsManager.reloadBoards(userId);
     },
-}
-
-function dragEnterHandler(dragEnterEvent) {
-    dragEnterEvent.target.classList.add("drop-zone")
-}
-
-function dragOverHandler(dragOverEvent) {
-}
-
-function dragLeaveHandler(dragLeaveEvent) {
-    dragLeaveEvent.target.classList.remove("drop-zone")
-}
-
-function dropHandler(dragLeaveEvent) {
 }
 
 function removeColumnButtonHandler(clickEvent) {
