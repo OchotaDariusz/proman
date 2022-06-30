@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, session, request, jsonify, send_from_directory, make_response
+from flask import Flask, render_template, url_for, session, request, jsonify
 from flask_socketio import SocketIO
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -261,18 +261,6 @@ def handle_msg(msg):
     Listen on any messages, then sends message to front-end which will trigger the syncing function
     """
     socketio.send('Syncing...')
-
-
-@app.route('/manifest.json')
-def manifest():
-    return send_from_directory('static', 'manifest.json')
-
-
-@app.route('/sw.js')
-def service_worker():
-    response = make_response(send_from_directory('static', 'js/sw.js'))
-    response.headers['Cache-Control'] = 'no-cache'
-    return response
 
 
 def main():
