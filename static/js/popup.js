@@ -52,6 +52,7 @@ export const showPopup = element => {
 }
 
 const closePopup = element => {
+    flashList.innerHTML = "<div class='lds-ring'><div>";
     element.classList.remove('fade-in');
     element.style.display = 'none';
 }
@@ -82,8 +83,8 @@ if (registerButton) {
 
 popUps.forEach(popUp => {
     popUp.addEventListener('click', () => {
-        popUp.classList.remove('fade-in')
-        popUp.classList.add('fade-out')
+        popUp.classList.remove('fade-in');
+        popUp.classList.add('fade-out');
         setTimeout(() => {
             closePopup(popUp);
         }, 400);
