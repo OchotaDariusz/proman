@@ -8,6 +8,10 @@
     --status-2: #594300;
     --status-3: #525900;
     --status-4: #085900;
+    --status-5: #0e8d00;
+    --status-6: #14c400;
+    --status-7: #19e501;
+    --status-8: #3bff23;
     --shadow: rgba(0, 0, 0, 0.35);
 }
 
@@ -132,6 +136,22 @@ section.board {
 
 .board-column:nth-of-type(4) .card {
     background: var(--status-4);
+}
+
+.board-column:nth-of-type(5) .card {
+    background: var(--status-5);
+}
+
+.board-column:nth-of-type(6) .card {
+    background: var(--status-6);
+}
+
+.board-column:nth-of-type(7) .card {
+    background: var(--status-7);
+}
+
+.board-column:nth-of-type(8) .card {
+    background: var(--status-8);
 }
 
 .card-archive {
