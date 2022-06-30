@@ -199,7 +199,7 @@ def get_last_status_order(board_id):
     if last_status_order is None:
         last_status_order = 0
     else:
-        last_status_order = int(last_status_order['card_order'])
+        last_status_order = int(last_status_order['status_order'])
     return last_status_order
 
 
