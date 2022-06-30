@@ -126,10 +126,17 @@ def add_new_user(new_user):
 
 def add_new_board(board_title, public, user_id):
     isPublic = (public == 'public')
-    data_manager.execute_statement(
+    new_board_id = data_manager.execute_select(
         """
         INSERT INTO boards (title, public, user_id)
-        VALUES(%(title)s, %(isPublic)s, %(user_id)s)""", variables={'title': board_title, 'user_id': user_id, 'isPublic': isPublic})
+        VALUES (%(title)s, %(isPublic)s, %(user_id)s);
+        SELECT currval('boards_id_seq') AS id""", variables={'title': board_title, 'user_id': user_id, 'isPublic': isPublic}, fetchall=False)
+    new_board_id = int(new_board_id['id'])
+    data_manager.execute_statement(
+        """INSERT INTO statuses (title, bound_to_board, status_order)
+        VALUES ('new', %(id)s, 1), ('in progress', %(id)s, 2), ('testing', %(id)s, 3), ('done', %(id)s, 4)
+        """, variables={'id': new_board_id}
+    )
 
 
 def get_last_card_order(board_id, status_id, archived=False):
@@ -170,7 +177,8 @@ def get_statuses(board_id=0):
     return data_manager.execute_select(
         """
         SELECT * FROM statuses
-        WHERE bound_to_board = 0 OR bound_to_board = %(board_id)s
+        WHERE bound_to_board = %(board_id)s
+        ORDER BY status_order
         """, variables={'board_id': board_id})
 
 
@@ -181,11 +189,26 @@ def remove_column(board_id, column_id):
         """, variables={'board_id': board_id, 'column_id': column_id})
 
 
+def get_last_status_order(board_id):
+    last_status_order = data_manager.execute_select(
+        """SELECT status_order
+        FROM statuses
+        WHERE bound_to_board = %(board_id)s 
+        ORDER BY status_order DESC
+        """, variables={'board_id': board_id}, fetchall=False)
+    if last_status_order is None:
+        last_status_order = 0
+    else:
+        last_status_order = int(last_status_order['card_order'])
+    return last_status_order
+
+
 def create_new_column(board_id, column_title):
+    last_status_order = get_last_status_order(board_id)
     data_manager.execute_statement(
-        """INSERT INTO statuses(title, bound_to_board)
-        VALUES (%(title)s, %(board_id)s)
-        """, variables={'title': column_title, 'board_id': board_id})
+        """INSERT INTO statuses(title, bound_to_board, status_order)
+        VALUES (%(title)s, %(board_id)s, %(status_order)s)
+        """, variables={'title': column_title, 'board_id': board_id, 'status_order': last_status_order + 1})
 
 
 def rename_column(board_id, column_id, column_title):

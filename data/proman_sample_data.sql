@@ -29,7 +29,8 @@ DROP TABLE IF EXISTS users;
 CREATE TABLE statuses (
     id              SERIAL PRIMARY KEY  NOT NULL,
     title           VARCHAR(200)        NOT NULL,
-    bound_to_board  INTEGER             NOT NULL
+    bound_to_board  INTEGER             NOT NULL,
+    status_order    INTEGER             NOT NULL
 );
 
 CREATE TABLE boards (
@@ -59,10 +60,14 @@ CREATE TABLE users (
 --- insert data
 ---
 
-INSERT INTO statuses(title, bound_to_board) VALUES ('new', 0);
-INSERT INTO statuses(title, bound_to_board) VALUES ('in progress', 0);
-INSERT INTO statuses(title, bound_to_board) VALUES ('testing', 0);
-INSERT INTO statuses(title, bound_to_board) VALUES ('done', 0);
+INSERT INTO statuses(title, bound_to_board, status_order) VALUES ('new', 1, 1);
+INSERT INTO statuses(title, bound_to_board, status_order) VALUES ('in progress', 1, 2);
+INSERT INTO statuses(title, bound_to_board, status_order) VALUES ('testing', 1, 3);
+INSERT INTO statuses(title, bound_to_board, status_order) VALUES ('done', 1, 4);
+INSERT INTO statuses(title, bound_to_board, status_order) VALUES ('new', 2, 1) ;
+INSERT INTO statuses(title, bound_to_board, status_order) VALUES ('in progress', 2, 2);
+INSERT INTO statuses(title, bound_to_board, status_order) VALUES ('testing', 2, 3);
+INSERT INTO statuses(title, bound_to_board, status_order) VALUES ('done', 2, 4);
 
 INSERT INTO boards(title, public, user_id) VALUES ('Board 1', TRUE, 1);
 INSERT INTO boards(title, public, user_id) VALUES ('Board 2', TRUE, 1);
@@ -73,12 +78,12 @@ INSERT INTO cards VALUES (nextval('cards_id_seq'), 1, 2, 'in progress card', 1, 
 INSERT INTO cards VALUES (nextval('cards_id_seq'), 1, 3, 'planning', 1, 1, FALSE);
 INSERT INTO cards VALUES (nextval('cards_id_seq'), 1, 4, 'done card 1', 1, 1, FALSE);
 INSERT INTO cards VALUES (nextval('cards_id_seq'), 1, 4, 'done card 1', 2, 1, FALSE);
-INSERT INTO cards VALUES (nextval('cards_id_seq'), 2, 1, 'new card 1', 1, 1, FALSE);
-INSERT INTO cards VALUES (nextval('cards_id_seq'), 2, 1, 'new card 2', 2, 1, FALSE);
-INSERT INTO cards VALUES (nextval('cards_id_seq'), 2, 2, 'in progress card', 1, 1, FALSE);
-INSERT INTO cards VALUES (nextval('cards_id_seq'), 2, 3, 'planning', 1, 1, FALSE);
-INSERT INTO cards VALUES (nextval('cards_id_seq'), 2, 4, 'done card 1', 1, 1, FALSE);
-INSERT INTO cards VALUES (nextval('cards_id_seq'), 2, 4, 'done card 1', 2, 1, FALSE);
+INSERT INTO cards VALUES (nextval('cards_id_seq'), 2, 5, 'new card 1', 1, 1, FALSE);
+INSERT INTO cards VALUES (nextval('cards_id_seq'), 2, 5, 'new card 2', 2, 1, FALSE);
+INSERT INTO cards VALUES (nextval('cards_id_seq'), 2, 6, 'in progress card', 1, 1, FALSE);
+INSERT INTO cards VALUES (nextval('cards_id_seq'), 2, 7, 'planning', 1, 1, FALSE);
+INSERT INTO cards VALUES (nextval('cards_id_seq'), 2, 8, 'done card 1', 1, 1, FALSE);
+INSERT INTO cards VALUES (nextval('cards_id_seq'), 2, 8, 'done card 1', 2, 1, FALSE);
 
 INSERT INTO users(username, password)
 VALUES('ask@mate.com', '$2b$12$/43VzFMeu2NBxkCSWb/G/edG.p3HnfYpnAE02DxZMym1AOutUH4aO');
@@ -98,3 +103,4 @@ ALTER TABLE ONLY boards
 
 ALTER TABLE ONLY cards
     ADD CONSTRAINT fk_cards_user_id FOREIGN KEY (user_id) REFERENCES users(id);
+

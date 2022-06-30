@@ -171,11 +171,9 @@ def delete_status(board_id):
     :param board_id: id of the board
     """
     data = request.get_json()
-    if int(data['columnId']) > 4:
-        queries.remove_column(board_id, data['columnId'])
-        return {'message': 'Successfully removed.'}
-    else:
-        return {'message': 'You cannot remove this column'}
+
+    queries.remove_column(board_id, data['columnId'])
+    return {'message': 'Successfully removed.'}
 
 
 @app.route('/api/statuses/<int:board_id>', methods=['PATCH'])
@@ -186,11 +184,9 @@ def patch_rename_status(board_id):
     :param board_id: id of the board
     """
     data = request.get_json()
-    if int(data['columnId']) > 4:
-        queries.rename_column(board_id, data['columnId'], data['columnTitle'])
-        return {'message': 'Successfully renamed.'}
-    else:
-        return {'message': 'You cannot rename this column'}
+
+    queries.rename_column(board_id, data['columnId'], data['columnTitle'])
+    return {'message': 'Successfully renamed.'}
 
 
 @app.route("/api/users/<int:user_id>/boards", methods=["POST"])
