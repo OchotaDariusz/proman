@@ -84,25 +84,16 @@ def get_card(card_id, user_id):
         """, variables={'card_id': card_id, 'user_id': user_id}, fetchall=False)
 
 
-def get_number_of_cards(board_id, status_id, archived):
-    return data_manager.execute_select(
-        """SELECT COUNT(*) AS count
-        FROM cards
-        WHERE board_id = %(board_id)s AND status_id = %(status_id)s AND archived = %(archived)s
-        """, variables={'board_id': board_id, 'status_id': status_id, 'archived': archived}, fetchall=False)
-
-
 def archive_card(board_id, card_id, user_id):
     card = get_card(card_id, user_id)
-    n = get_number_of_cards(board_id, card['status_id'], not card['archived'])['count']
-    print(n)
-    print(card)
-    archived = "TRUE" if card['archived'] is False else "FALSE"
+    n = get_last_card_order(board_id, card['status_id'], not card['archived'])
+    archive = not card['archived']
     data_manager.execute_statement(
         """UPDATE cards
-        SET archived = """ + archived + ", card_order = " + str(int(n)+1) + """
+        SET archived = %(archive)s, card_order = %(last_order)s
         WHERE id = %(card_id)s AND board_id = %(board_id)s AND user_id = %(user_id)s""",
-        variables={'card_id': card_id, 'board_id': board_id, 'user_id': user_id})
+        variables={'card_id': card_id, 'board_id': board_id,
+                   'user_id': user_id, 'last_order': n + 1, 'archive': archive})
 
 
 def get_user_by_username(username):
@@ -134,28 +125,29 @@ def add_new_user(new_user):
 
 
 def add_new_board(board_title, public, user_id):
-    public = 'TRUE' if public == 'public' else 'FALSE'
+    isPublic = (public == 'public')
     data_manager.execute_statement(
         """
         INSERT INTO boards (title, public, user_id)
-        VALUES(%(title)s, """ + public + ", %(user_id)s)", variables={'title': board_title, 'user_id': user_id})
+        VALUES(%(title)s, %(isPublic)s, %(user_id)s)""", variables={'title': board_title, 'user_id': user_id, 'isPublic': isPublic})
 
 
-def get_last_card_order(board_id, status_id):
-    return data_manager.execute_select(
+def get_last_card_order(board_id, status_id, archived=False):
+    last_order_number = data_manager.execute_select(
         """SELECT card_order
         FROM cards
-        WHERE board_id = %(board_id)s AND status_id = %(status_id)s
+        WHERE board_id = %(board_id)s AND status_id = %(status_id)s AND archived = %(archived)s
         ORDER BY card_order DESC
-        """, variables={'board_id': board_id, 'status_id': status_id}, fetchall=False)
-
-
-def create_new_card(board_id, card_details, user_id):
-    last_order_number = get_last_card_order(board_id, card_details['statusId'])
+        """, variables={'board_id': board_id, 'status_id': status_id, 'archived': archived}, fetchall=False)
     if last_order_number is None:
         last_order_number = 0
     else:
         last_order_number = int(last_order_number['card_order'])
+    return last_order_number
+
+
+def create_new_card(board_id, card_details, user_id):
+    last_order_number = get_last_card_order(board_id, card_details['statusId'])
     data_manager.execute_statement(
         """
         INSERT INTO cards(board_id, status_id, title, card_order, user_id, archived)
