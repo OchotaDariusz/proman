@@ -16,7 +16,7 @@ export let cardsManager = {
             const cardBuilder = htmlFactory(htmlTemplates.card);
             const content = cardBuilder(card);
             domManager.addChild(`.board-column-content[data-column-id="${card.status_id}"][data-board-id="${boardId}"]`, content)
-            if (card['user_id']  === userId) {
+            if (card['user_id'] === userId) {
                 domManager.addEventListener(
                     `.card-remove[data-card-id="${card.id}"]`,
                     "click",
@@ -52,19 +52,8 @@ export let cardsManager = {
             card.ondragover = (e) => {
                 e.preventDefault();
             };
-            card.ondrop = async function (e) {
-                e.preventDefault();
-                if (card !== current) {
-                    if (current.dataset.statusId === card.dataset.statusId &&
-                        current.dataset.order < card.dataset.order) {
-                        card.parentElement.insertBefore(current, card.nextSibling);
-                    } else {
-                        card.parentElement.insertBefore(current, card);
-                    }
-                    const newCardData = updateCardData(current, card.dataset.statusId, card.dataset.order, cards);
-                    await dataHandler.updateCards(boardId, userId, newCardData);
-                    socket.send('a');
-                }
+            card.ondrop = (e) => {
+                handleDropOnCardEvent(current, card, cards, boardId);
             }
         }
         let columns = document.querySelectorAll(`.board-column-content[data-board-id="${boardId}"]`);
@@ -75,9 +64,9 @@ export let cardsManager = {
                 };
                 column.ondrop = async function () {
                     column.appendChild(current);
-                    const newCardData = updateCardData(current, column.dataset.columnId, 1, cards);
-                    await dataHandler.updateCards(boardId, userId, newCardData);
-                    socket.send('a');
+                    updateCardsData(current, column.dataset.columnId, 1, cards, boardId)
+                        .then(() => socket.send('a'))
+                        .catch(err => console.log(err));
                 }
             }
         }
@@ -167,29 +156,41 @@ function renameCardTitle(event, card) {
     });
 }
 
-function updateCardData(current, dropStatusId, dropOrder, cards) {
+
+function handleDropOnCardEvent(draggedCard, dropZoneCard, cards, boardId) {
+    if (dropZoneCard !== draggedCard) {
+        if (draggedCard.dataset.statusId === dropZoneCard.dataset.statusId &&
+            draggedCard.dataset.order < dropZoneCard.dataset.order) {
+            dropZoneCard.parentElement.insertBefore(draggedCard, dropZoneCard.nextSibling);
+        } else {
+            dropZoneCard.parentElement.insertBefore(draggedCard, dropZoneCard);
+        }
+        updateCardsData(draggedCard, dropZoneCard.dataset.statusId, dropZoneCard.dataset.order,
+            cards, boardId).then(() => socket.send('a')).catch(err => console.log(err));
+    }
+}
+
+
+async function updateCardsData(dragged, dropStatusId, dropOrder, cards, boardId) {
     let newCardData;
-    let currentStatusId = current.dataset.statusId;
-    let currentOrder = current.dataset.order;
-    current.dataset.order = dropOrder;
-    current.dataset.statusId = dropStatusId;
-    newCardData = [{'id': current.dataset.cardId, 'status_id': dropStatusId, 'card_order': dropOrder}]
+    let dragStatusId = dragged.dataset.statusId;
+    let dragOrder = dragged.dataset.order;
+    dragged.dataset.order = dropOrder;
+    dragged.dataset.statusId = dropStatusId;
+    newCardData = [{'id': dragged.dataset.cardId, 'status_id': dropStatusId, 'card_order': dropOrder}]
     cards.forEach(c => {
-        if ((currentStatusId === dropStatusId && currentOrder < dropOrder && c.dataset.order <= dropOrder ||
-                currentStatusId !== dropStatusId) &&
-            c.dataset.statusId === currentStatusId &&
-            c.dataset.order > currentOrder &&
-            c !== current) {
+        if ((dragStatusId === dropStatusId && dragOrder < dropOrder && c.dataset.order <= dropOrder ||
+                dragStatusId !== dropStatusId) && c.dataset.statusId === dragStatusId &&
+            c.dataset.order > dragOrder && c !== dragged) {
             c.dataset.order = String(Number(c.dataset.order) - 1);
             newCardData.push({
                 'id': c.dataset.cardId,
                 'status_id': c.dataset.statusId,
                 'card_order': c.dataset.order
             })
-        } else if ((currentStatusId === dropStatusId && c.dataset.statusId === currentStatusId && c.dataset.order < currentOrder ||
-                currentStatusId !== dropStatusId && c.dataset.statusId === dropStatusId) &&
-            c.dataset.order >= dropOrder &&
-            c !== current) {
+        } else if ((dragStatusId === dropStatusId && c.dataset.statusId === dragStatusId && c.dataset.order < dragOrder ||
+                dragStatusId !== dropStatusId && c.dataset.statusId === dropStatusId) &&
+            c.dataset.order >= dropOrder && c !== dragged) {
             c.dataset.order = String(Number(c.dataset.order) + 1);
             newCardData.push({
                 'id': c.dataset.cardId,
@@ -198,6 +199,5 @@ function updateCardData(current, dropStatusId, dropOrder, cards) {
             })
         }
     })
-    console.log(newCardData);
-    return newCardData;
+    await dataHandler.updateCards(boardId, userId, newCardData);
 }
