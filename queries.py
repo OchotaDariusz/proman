@@ -84,13 +84,24 @@ def get_card(card_id, user_id):
         """, variables={'card_id': card_id, 'user_id': user_id}, fetchall=False)
 
 
+def get_number_of_cards(board_id, status_id, archived):
+    return data_manager.execute_select(
+        """SELECT COUNT(*) AS count
+        FROM cards
+        WHERE board_id = %(board_id)s AND status_id = %(status_id)s AND archived = %(archived)s
+        """, variables={'board_id': board_id, 'status_id': status_id, 'archived': archived}, fetchall=False)
+
+
 def archive_card(board_id, card_id, user_id):
     card = get_card(card_id, user_id)
+    n = get_number_of_cards(board_id, card['status_id'], not card['archived'])['count']
+    print(n)
     print(card)
-    archive = "TRUE" if card['archived'] is False else "FALSE"
+    archived = "TRUE" if card['archived'] is False else "FALSE"
     data_manager.execute_statement(
         """UPDATE cards
-        SET archived = """ + archive + " WHERE id = %(card_id)s AND board_id = %(board_id)s AND user_id = %(user_id)s",
+        SET archived = """ + archived + ", card_order = " + str(int(n)+1) + """
+        WHERE id = %(card_id)s AND board_id = %(board_id)s AND user_id = %(user_id)s""",
         variables={'card_id': card_id, 'board_id': board_id, 'user_id': user_id})
 
 
