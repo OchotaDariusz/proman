@@ -7,13 +7,14 @@ import auth
 from util import json_response
 import mimetypes
 import queries
+import os
 
 mimetypes.add_type('application/javascript', '.js')
 app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app)
-app.secret_key = '9232b3e6634925ae2e068c9810e53f4c10faef6e4ff17fb4'
 load_dotenv()
+app.secret_key = os.environ.get('SECRET_KEY')
 
 
 @app.route("/")
