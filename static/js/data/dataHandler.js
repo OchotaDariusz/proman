@@ -1,6 +1,15 @@
 export let dataHandler = {
     getBoards: async function (userId) {
-        return await apiGet(`/api/users/${userId}/boards`);
+        let boards = await apiGet(`/api/users/${userId}/boardss`);
+        if (boards !== null) {
+            return boards;
+        } else {
+            boards = Array.from(JSON.parse(localStorage.getItem('boards')));
+            boards.filter(board => {
+                return board['user_id'] === userId && board['public'] === false || board['public'];
+            });
+            return boards;
+        }
     },
     getStatuses: async function (boardId) {
         return await apiGet(`/api/statuses/${boardId}`);
@@ -13,10 +22,24 @@ export let dataHandler = {
     },
     createNewBoard: async function (boardTitle, public_private, userId) {
         // creates new board, saves it and calls the callback function with its data
-        return await apiPost(`/api/users/${userId}/boards`, {
+        let response = await apiPost(`/api/users/${userId}/boardss`, {
             "boardTitle": boardTitle,
             "public_private": public_private
         });
+        if (!response) {
+            const boards = Array.from(JSON.parse(localStorage.getItem('boards')));
+            const newBoard = {
+                id: boards[boards.length - 1].id + 1,
+                public: (public_private === 'public'),
+                title: boardTitle,
+                user_id: userId
+            };
+            boards.push(newBoard);
+            localStorage.setItem('boards', JSON.stringify(boards));
+            return JSON.parse(JSON.stringify({'message': 'Successfully created.'}));
+        } else {
+            return response;
+        }
     },
     createNewCard: async function (cardTitle, boardId, statusId, userId) {
         // creates new card, saves it and calls the callback function with its data
@@ -65,6 +88,8 @@ async function apiGet(url) {
     });
     if (response.ok) {
         return await response.json();
+    } else {
+        return null;
     }
 }
 
@@ -78,6 +103,8 @@ async function apiPost(url, payload) {
     });
     if (response.ok) {
         return await response.json();
+    } else {
+        return null;
     }
 }
 

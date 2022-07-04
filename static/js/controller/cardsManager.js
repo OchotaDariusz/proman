@@ -9,8 +9,10 @@ export let cardsManager = {
         let cards;
         if (archived === true) {
             cards = await dataHandler.getArchivedCardsByBoardId(userId, boardId);
+            localStorage.setItem('archived_cards', JSON.stringify(cards));
         } else {
             cards = await dataHandler.getCardsByBoardId(userId, boardId);
+            localStorage.setItem('cards', JSON.stringify(cards));
         }
         for (let card of cards) {
             const cardBuilder = htmlFactory(htmlTemplates.card);
