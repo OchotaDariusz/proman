@@ -17,6 +17,10 @@ import {socket} from "../main.js";
 export let boardsManager = {
     loadBoards: async function (userId) {
         const boards = await dataHandler.getBoards(userId);
+        if (boards) {
+            localStorage.setItem('boards', JSON.stringify(boards));
+        }
+        console.log(boards);
         for (let board of boards) {
             const boardBuilder = htmlFactory(htmlTemplates.board);
             const content = boardBuilder(board);
