@@ -90,6 +90,17 @@ export let boardsManager = {
                 });
             })
             .catch(err => console.log(err));
+        setTimeout(async () => {
+            await this.verifyLoadedBoards(userId);
+        }, 3000);
+    },
+    verifyLoadedBoards: async function (userId) {
+        const boards = await dataHandler.getBoards(userId);
+        const loadedBoards = document.querySelectorAll('section.board');
+
+        if (boards.length !== loadedBoards.length){
+            this.reloadBoards(userId);
+        }
     },
 };
 
