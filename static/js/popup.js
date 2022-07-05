@@ -1,5 +1,5 @@
 import { cardsManager } from "./controller/cardsManager.js";
-import { boardsManager } from "./controller/boardsManager.js";
+import { boardsManager, loadBoardContent } from "./controller/boardsManager.js";
 import { columnsManager } from "./controller/columnsManager.js";
 
 export const loginPopup = document.querySelector('#login-popup');
@@ -51,7 +51,7 @@ export const showPopup = element => {
   element.style.display = 'flex';
 }
 
-const closePopup = element => {
+export const closePopup = element => {
   flashList.innerHTML = "<div class='lds-ring'><div>";
   element.classList.remove('fade-in');
   element.style.display = 'none';
@@ -138,7 +138,7 @@ registerForm.addEventListener('submit', event => {
 });
 
 if(createCardForm) {
-  createCardForm.addEventListener('submit', async event => {
+  createCardForm.addEventListener('submit', event => {
     event.preventDefault();
 
     const cardTitle = createCardTitle.value;
@@ -146,10 +146,11 @@ if(createCardForm) {
     const boardId = localStorage.getItem('boardId');
     localStorage.removeItem('boardId');
 
-    await cardsManager.createCard(cardTitle, boardId, cardStatus);
-
-    createCardForm.reset();
-    closePopup(createCardPopup);
+    cardsManager.createCard(cardTitle, boardId, cardStatus, userId)
+      .then(async () => {
+        createCardForm.reset();
+      })
+      .catch(err => console.log(err));
   });
 }
 
@@ -219,7 +220,13 @@ async function reRenderDomForLoggedUser() {
 
 async function login(response) {
   userId = response['user_id'];
-  await reRenderDomForLoggedUser();
+  reRenderDomForLoggedUser()
+    .then(async () => {
+      if(localStorage.getItem('boardId') !== null) {
+        await boardsManager.closeBoards(localStorage.getItem('boardId'))
+      }
+    })
+    .catch(err => console.log(err));
 }
 
 async function reRenderDomForLoggedOutUser() {

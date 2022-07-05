@@ -54,19 +54,22 @@ export let boardsManager = {
             `.board-title[data-board-id="${board.id}"]`,
             "click",
             event => {
-              renameBoardTitle(event, board);
+              renameBoardTitle(event, `.board-title[data-board-id="${board.id}"]`, 'boards', [board]);
             }
           );
           domManager.addEventListener(`.fas.fa-trash-alt.board[data-board-id="${board.id}"]`,
             "click",
             () => {
               removeBoard(board);
-              socket.send('boards');
             }
           );
         }
       }
     }
+  },
+  loadBoard: function(boardId, userId) {
+    loadBoardContent(boardId);
+    domManager.toggleCSSClasses(`.fas[data-board-id="${boardId}"]`, 'fa-chevron-down', 'fa-chevron-up');
   },
   createBoard: function(boardTitle, public_private) {
     dataHandler.createNewBoard(boardTitle, public_private, userId)
@@ -78,16 +81,27 @@ export let boardsManager = {
       .catch(err => console.log(err));
     socket.send('boards');
   },
-  closeBoards: function() {
+  closeBoard: async function(boardId) {
+    const board = document.querySelector(`.board[data-board-id="${boardId}"]`);
+    if(board) {
+      board.remove();
+    }
+  },
+  closeBoards: async function(boardId = null) {
     const boards = document.querySelectorAll('section.board');
     boards.forEach(board => {
       board.remove();
     });
     this.loadBoards(userId)
       .then(() => {
+        if(boardId !== null) {
+          this.loadBoard(boardId, userId);
+        }
+      })
+      .then(() => {
         setTimeout(async () => {
           await this.verifyLoadedBoards(userId);
-        }, 3000);
+        }, 1500);
       })
       .catch(err => console.log(err));
   },
@@ -108,7 +122,7 @@ export let boardsManager = {
       .then(() => {
         setTimeout(async () => {
           await this.verifyLoadedBoards(userId);
-        }, 3000);
+        }, 1500);
       })
       .catch(err => console.log(err));
   },
@@ -151,6 +165,7 @@ function removeBoard(board) {
       .catch(err => console.log(err));
     const boardToRemove = document.querySelector(`.board[data-board-id="${board.id}"]`);
     boardToRemove.remove();
+    socket.send('boards');
   }
 }
 
@@ -190,46 +205,80 @@ function checkForLoadedContent() {
   return openedBoardsId
 }
 
-function loadBoardContent(boardId, archived = false) {
+export function loadBoardContent(boardId, archived = false) {
   columnsManager.loadColumns(boardId)
     .then(() => cardsManager.loadCards(boardId, archived))
     .then(() => cardsManager.initDragAndDrop(boardId))
     .catch(err => console.log(err));
 }
 
-const saveNewBoardTitle = (submitEvent, event, board, newTitle, newTitleForm) => {
-  submitEvent.preventDefault();
-  event.target.innerText = newTitle.value;
-  newTitleForm.outerHTML = event.target.outerHTML;
-  dataHandler.renameBoard(board.id, newTitle.value, userId)
-    .then(response => {
-      flashList.innerHTML = '';
-      flashList.innerHTML = `<li>${response.message}</li>`;
-      showPopup(flashes);
-    })
-    .catch(err => console.log(err));
-  newTitleForm.reset();
-  domManager.addEventListener(
-    `.board-title[data-board-id="${board.id}"]`,
-    "click",
-    event => {
-      renameBoardTitle(event, board);
-    }
-  );
-};
+// const saveNewBoardTitle = (submitEvent, event, board, newTitle, newTitleForm, save = true) => {
+//   submitEvent.preventDefault();
+//   event.target.innerText = newTitle.value;
+//   newTitleForm.outerHTML = event.target.outerHTML;
+//   if(save) {
+//     dataHandler.renameBoard(board.id, newTitle.value, userId)
+//       .then(response => {
+//         flashList.innerHTML = '';
+//         flashList.innerHTML = `<li>${response.message}</li>`;
+//         showPopup(flashes);
+//       })
+//       .catch(err => console.log(err));
+//   }
+//   newTitleForm.reset();
+//   domManager.addEventListener(
+//     `.board-title[data-board-id="${board.id}"]`,
+//     "click",
+//     event => {
+//       renameBoardTitle(event, `.board-title[data-board-id="${board.id}"]`, 'boards', [board]);
+//     }
+//   );
+// };
 
-function renameBoardTitle(event, board) {
+// function renameBoardTitle(event, board) {
+//   const title = event.target.innerText;
+//   event.target.outerHTML = `<form id="new-title-form" style="display: inline-block;" class="board-title"><input type="text" id="new-title" value="${title}"><button type="submit" style="margin-left: 15px;">save</button></form>`;
+//   const newTitleForm = document.querySelector('#new-title-form');
+//   const newTitle = document.querySelector('#new-title');
+//   newTitle.focus();
+//   newTitleForm.addEventListener('submit', submitEvent => {
+//     if(!!newTitle.innerText && title !== newTitle.innerText) {
+//       console.log(title, newTitle.innerText)
+//       saveNewBoardTitle(submitEvent, event, board, newTitle, newTitleForm);
+//       socket.send('boards');
+//     }
+//     saveNewBoardTitle(submitEvent, event, board, newTitle, newTitleForm, false);
+//   });
+//   newTitleForm.addEventListener('focusout', submitEvent => {
+//     if(!!newTitle.innerText && title !== newTitle.innerText) {
+//       console.log('title', title, 'newTitle', !!newTitle.innerText)
+//       saveNewBoardTitle(submitEvent, event, board, newTitle, newTitleForm);
+//       socket.send('boards');
+//     }
+//     saveNewBoardTitle(submitEvent, event, board, newTitle, newTitleForm, false);
+//   });
+// }
+
+function renameBoardTitle(event, selector, socketMsg, elements) {
+  console.log('elements board', elements)
   const title = event.target.innerText;
   event.target.outerHTML = `<form id="new-title-form" style="display: inline-block;" class="board-title"><input type="text" id="new-title" value="${title}"><button type="submit" style="margin-left: 15px;">save</button></form>`;
   const newTitleForm = document.querySelector('#new-title-form');
   const newTitle = document.querySelector('#new-title');
   newTitle.focus();
   newTitleForm.addEventListener('submit', submitEvent => {
-    saveNewBoardTitle(submitEvent, event, board, newTitle, newTitleForm);
-    socket.send('boards');
+    if(title !== newTitle.value) {
+      console.log(title, newTitle.value)
+      domManager.saveNewTitle(submitEvent, event, newTitle, newTitleForm, dataHandler.renameBoard, renameBoardTitle, socketMsg, true, selector, elements);
+      socket.send(socketMsg);
+    }
+    domManager.saveNewTitle(submitEvent, event, newTitle, newTitleForm, dataHandler.renameBoard, renameBoardTitle, socketMsg, false, selector, elements);
   });
   newTitleForm.addEventListener('focusout', submitEvent => {
-    saveNewBoardTitle(submitEvent, event, board, newTitle, newTitleForm);
-    socket.send('boards');
+    if(title !== newTitle.value) {
+      domManager.saveNewTitle(submitEvent, event, newTitle, newTitleForm, dataHandler.renameBoard, renameBoardTitle, socketMsg, true, selector, elements);
+      socket.send(socketMsg);
+    }
+    domManager.saveNewTitle(submitEvent, event, newTitle, newTitleForm, dataHandler.renameBoard, renameBoardTitle, socketMsg, false, selector, elements);
   });
 }

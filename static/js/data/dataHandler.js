@@ -39,9 +39,6 @@ export let dataHandler = {
       return [];
     }
   },
-  getStatuses: async function(boardId) {
-    return await apiGet(`/api/statuses/${boardId}`);
-  },
   getCardsByBoardId: function(userId, boardId) {
     return apiGet(`/api/users/${userId}/boards/${boardId}/cards/`);
   },
@@ -80,8 +77,8 @@ export let dataHandler = {
     // updates status and/or order after a card was dragged and dropped for all neighbor cards
     return await apiPatch(`/api/users/${userId}/boards/${boardId}/cards`, { "cards": cards });
   },
-  renameBoard: async function(boardId, boardTitle, userId) {
-    return await apiPatch(`/api/users/${userId}/boards/${boardId}`, { "boardTitle": boardTitle });
+  renameBoard: async function(boardTitle, userId, board) {
+    return await apiPatch(`/api/users/${userId}/boards/${board.id}`, { "boardTitle": boardTitle });
   },
   deleteCard: async function(boardId, cardId, userId) {
     return await apiDelete(`/api/users/${userId}/boards/${boardId}/cards/${cardId}`);
@@ -93,17 +90,20 @@ export let dataHandler = {
     // creates new board, saves it and calls the callback function with its data
     return await apiDelete(`/api/users/${userId}/boards/${boardId}`);
   },
-  renameCard: async function(boardId, cardId, cardTitle, userId) {
+  renameCard: async function(cardTitle, userId, boardId, cardId) {
     return await apiPatch(`/api/users/${userId}/boards/${boardId}/cards/${cardId}`, { "cardTitle": cardTitle });
   },
-  createColumn: async function(boardId, columnTitle) {
-    return await apiPost(`/api/statuses/${boardId}`, { "columnTitle": columnTitle });
+  getStatuses: async function(userId, boardId) {
+    return await apiGet(`/api/users/${userId}/statuses/${boardId}`);
   },
-  removeColumn: async function(boardId, columnId) {
-    return await apiDelete(`/api/statuses/${boardId}`, { 'columnId': columnId })
+  createColumn: async function(userId, boardId, columnTitle) {
+    return await apiPost(`/api/users/${userId}/statuses/${boardId}`, { "columnTitle": columnTitle });
   },
-  renameColumn: async function(columnId, boardId, columnTitle) {
-    return await apiPatch(`/api/statuses/${boardId}`, {
+  removeColumn: async function(userId, boardId, columnId) {
+    return await apiDelete(`/api/users/${userId}/statuses/${boardId}`, { 'columnId': columnId })
+  },
+  renameColumn: async function(columnTitle, userId, columnId, boardId) {
+    return await apiPatch(`/api/users/${userId}/statuses/${boardId}`, {
       "columnTitle": columnTitle,
       "columnId": columnId
     });
@@ -137,8 +137,14 @@ async function apiPost(url, payload) {
     body: JSON.stringify(payload),
   });
   if(response.ok) {
-    return await response.json();
+    const data = await response.json();
+    console.log(data, 'data')
+    return data;
   } else {
+    const data = await response.json();
+    if(data.hasOwnProperty('message')) {
+      return data;
+    }
     return null;
   }
 }
@@ -152,8 +158,14 @@ async function apiDelete(url, payload = { "message": "empty" }) {
     body: JSON.stringify(payload),
   });
   if(response.ok) {
-    return await response.json();
+    const data = await response.json();
+    console.log(data, 'data')
+    return data;
   } else {
+    const data = await response.json();
+    if(data.hasOwnProperty('message')) {
+      return data;
+    }
     return null;
   }
 }
@@ -167,8 +179,14 @@ async function apiPatch(url, payload = { "message": "empty" }) {
     body: JSON.stringify(payload),
   });
   if(response.ok) {
-    return await response.json();
+    const data = await response.json();
+    console.log(data, 'data')
+    return data;
   } else {
+    const data = await response.json();
+    if(data.hasOwnProperty('message')) {
+      return data;
+    }
     return null;
   }
 }
