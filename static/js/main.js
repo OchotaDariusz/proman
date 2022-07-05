@@ -18,7 +18,7 @@ async function init() {
     if(content === 'boards') {
       boardsManager.reloadBoards(userId);
     } else {
-      columnsManager.reloadColumns(content)
+      columnsManager.reloadColumns(content);
     }
   });
 }

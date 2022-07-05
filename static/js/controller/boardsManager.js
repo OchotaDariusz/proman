@@ -1,7 +1,7 @@
 import { dataHandler } from "../data/dataHandler.js";
 import { htmlFactory, htmlTemplates } from "../view/htmlFactory.js";
 import { domManager } from "../view/domManager.js";
-import { cardsManager } from "./cardsManager.js";
+import { cardsManager, showCreateCardForm } from "./cardsManager.js";
 import {
   showPopup,
   loginPopup,
@@ -78,6 +78,19 @@ export let boardsManager = {
       .catch(err => console.log(err));
     socket.send('boards');
   },
+  closeBoards: function() {
+    const boards = document.querySelectorAll('section.board');
+    boards.forEach(board => {
+      board.remove();
+    });
+    this.loadBoards(userId)
+      .then(() => {
+        setTimeout(async () => {
+          await this.verifyLoadedBoards(userId);
+        }, 3000);
+      })
+      .catch(err => console.log(err));
+  },
   reloadBoards: function(userId) {
     const boardsIdToLoad = checkForLoadedContent();
 
@@ -114,15 +127,7 @@ function addCardButtonHandler(board) {
   if(userId === 0) {
     showPopup(loginPopup);
   } else {
-    dataHandler.getStatuses(board.id)
-      .then(statuses => {
-        createCardStatus.innerHTML = '';
-        statuses.forEach(status => {
-          createCardStatus.innerHTML += `<option value="${status.id}">${status.title}</option>`
-        });
-      })
-      .catch(err => console.log(err));
-    showPopup(createCardPopup);
+    showCreateCardForm(board.id);
   }
 }
 

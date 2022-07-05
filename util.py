@@ -8,7 +8,6 @@ def login_required(func):
         if 'username' in session:
             return func(*args, **kwargs)
         else:
-            flash("You need to login first")
-            return redirect(url_for('login_page'))
+            return jsonify({"message": "You need to login first"}), 403
 
     return wrap
