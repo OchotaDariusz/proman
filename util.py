@@ -1,15 +1,14 @@
 from functools import wraps
-from flask import jsonify
+from flask import jsonify, session
 
 
-def json_response(func):
-    """
-    Converts the returned dictionary into a JSON response
-    :param func:
-    :return:
-    """
+def login_required(func):
     @wraps(func)
-    def decorated_function(*args, **kwargs):
-        return jsonify(func(*args, **kwargs))
+    def wrap(*args, **kwargs):
+        if 'username' in session:
+            return func(*args, **kwargs)
+        else:
+            flash("You need to login first")
+            return redirect(url_for('login_page'))
 
-    return decorated_function
+    return wrap

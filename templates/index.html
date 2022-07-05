@@ -1,81 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>ProMan</title>
+{% block title %}ProMan{% endblock %}
 
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}">
-    <link rel="icon" type="image/png" sizes="32x32"
-          href="{{ url_for('static', filename='favicon/favicon-32x32.png') }}">
-    <link rel="icon" type="image/png" sizes="96x96"
-          href="{{ url_for('static', filename='favicon/favicon-96x96.png') }}">
-    <link rel="icon" type="image/png" sizes="16x16"
-          href="{{ url_for('static', filename='favicon/favicon-16x16.png') }}">
+{% block header %}ProMan{% endblock %}
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"/>
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/solid.css"
-          integrity="sha384-rdyFrfAIC05c5ph7BKz3l5NG5yEottvO/DQ0dCrwD8gzeQDjYBHNr1ucUpQuljos" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/fontawesome.css"
-          integrity="sha384-u5J7JghGz0qUrmEsWzBQkfvc8nK3fUT7DCaQzNQ+q4oEXhGSx+P2OqjWsfIRB8QT" crossorigin="anonymous">
+{% block body %}
 
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
-</head>
+    {% include 'include/login.html' %}
+    {% include 'include/register.html' %}
+    {% include 'include/create-card.html' %}
+    {% include 'include/create-column.html' %}
+    {% include 'include/add-board.html' %}
+    {% include 'include/add-private-board.html' %}
+    {% include 'include/flashes.html' %}
 
-<body>
+    {% include 'include/navbar.html' %}
 
-{% include 'include/login.html' %}
-{% include 'include/register.html' %}
-{% include 'include/create-card.html' %}
-{% include 'include/create-column.html' %}
-{% include 'include/addBoard.html' %}
-{% include 'include/add-private-board.html' %}
-{% include 'include/flashes.html' %}
+    {% include 'include/board-container.html' %}
 
-<h1>ProMan</h1>
-
-<div class="navbar">
-    <nav>
-        {% if user %}
-            <button type="button" id="login-button" style="display: none;">Login</button>
-            <button type="button" id="register-button" style="display: none;">Register</button>
-            <button type="submit" class="logout">LOGOUT</button>
-        {% else %}
-            <button type="button" id="login-button">Login</button>
-            <button type="button" id="register-button">Register</button>
-            <button type="submit" style="display: none" class="logout">LOGOUT</button>
-        {% endif %}
-    </nav>
-</div>
-
-<div class="board-container">
-    {% if user %}
-        <button type="button" id="add-board-button">Add new board</button>
-        <button type="button" id="add-private-board-button">Add new private board</button>
-    {% else %}
-        <button type="button" id="add-board-button-login">Add new board</button>
-        <button type="button" id="add-private-board-button" style="display: none">Add new private board</button>
-    {% endif %}
-    <button type="button" id="manual-sync">Refresh</button>
-</div>
-
-{% if user %}
-    <script>
-        let userId = {{ user.id }};
-    </script>
-{% else %}
-    <script>
-        let userId = 0;
-    </script>
-{% endif %}
-
-
-<script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
-<script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
-<script type="module" src="{{ url_for('static', filename='js/popup.js') }}"></script>
-<script src="https://kit.fontawesome.com/671f235a9d.js" crossorigin="anonymous"></script>
-</body>
-
-</html>
+{% endblock %}

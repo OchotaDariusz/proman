@@ -1,6 +1,6 @@
-import os
 import psycopg2
 import psycopg2.extras
+from os import environ
 
 
 def establish_connection(connection_data=None):
@@ -32,13 +32,13 @@ def get_connection_data(db_name=None):
     :db_name: optional parameter. By default it uses the environment variable value.
     """
     if db_name is None:
-        db_name = os.environ.get('MY_PSQL_DBNAME')
+        db_name = environ.get('PSQL_DBNAME')
 
     return {
         'dbname': db_name,
-        'user': os.environ.get('MY_PSQL_USER'),
-        'host': os.environ.get('MY_PSQL_HOST'),
-        'password': os.environ.get('MY_PSQL_PASSWORD')
+        'user': environ.get('PSQL_USER'),
+        'host': environ.get('PSQL_HOST'),
+        'password': environ.get('PSQL_PASSWORD')
     }
 
 
@@ -63,5 +63,3 @@ def execute_statement(statement, variables=None):
     with establish_connection() as conn:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
             cursor.execute(statement, variables)
-
-
