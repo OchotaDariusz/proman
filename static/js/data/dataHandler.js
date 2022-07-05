@@ -42,11 +42,11 @@ export let dataHandler = {
   getStatuses: async function(boardId) {
     return await apiGet(`/api/statuses/${boardId}`);
   },
-  getCardsByBoardId: async function(userId, boardId) {
-    return await apiGet(`/api/users/${userId}/boards/${boardId}/cards/`);
+  getCardsByBoardId: function(userId, boardId) {
+    return apiGet(`/api/users/${userId}/boards/${boardId}/cards/`);
   },
-  getArchivedCardsByBoardId: async function(userId, boardId) {
-    return await apiGet(`/api/users/${userId}/boards/${boardId}/cards/archived`);
+  getArchivedCardsByBoardId: function(userId, boardId) {
+    return apiGet(`/api/users/${userId}/boards/${boardId}/cards/archived`);
   },
   createNewBoard: async function(boardTitle, public_private, userId) {
     // creates new board, saves it and calls the callback function with its data
@@ -114,9 +114,16 @@ async function apiGet(url) {
   let response = await fetch(url, {
     method: "GET",
   });
+  console.log(response)
   if(response.ok) {
-    return await response.json();
+    const data = await response.json();
+    console.log(data, 'data')
+    return data;
   } else {
+    const data = await response.json();
+    if(data.hasOwnProperty('message')) {
+      return data;
+    }
     return null;
   }
 }

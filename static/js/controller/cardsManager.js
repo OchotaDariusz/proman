@@ -2,76 +2,50 @@ import { dataHandler } from "../data/dataHandler.js";
 import { htmlFactory, htmlTemplates } from "../view/htmlFactory.js";
 import { domManager } from "../view/domManager.js";
 import { socket } from "../main.js";
-import { flashes, flashList, showPopup } from "../popup.js";
+import { flashes, flashList, loginPopup, showPopup, createCardPopup, createCardStatus } from "../popup.js";
+import { boardsManager } from "./boardsManager.js";
 
 export let cardsManager = {
   loadCards: async function(boardId, archived = false) {
-    let cards;
     domManager.addChild(
       `.board-header[data-board-id="${boardId}"]`,
       `<div class="board-card-header" data-board-id="${boardId}"></div>`,
       'afterend'
     );
-    if(archived === true) {
-      // cards = await dataHandler.getArchivedCardsByBoardId(userId, boardId);
-      // document.querySelector(`.board-title[data-board-id="${boardId}"]`).innerText = "Archived";
-      // if(cards && localStorage.getItem('cards') === null) {
-      //   localStorage.setItem('archived_cards', JSON.stringify(cards));
-      // } else if(cards === null) {
-      //   cards = Array.from(JSON.stringify(localStorage.getItem('archived_cards')));
-      // }
-      cards = await setup_cards(
-        dataHandler.getArchivedCardsByBoardId,
-        userId,
-        boardId,
-        'Archived cards',
-        'archived_cards'
-      );
-    } else {
-      // cards = await dataHandler.getCardsByBoardId(userId, boardId);
-      // document.querySelector(`.board-title[data-board-id="${boardId}"]`).innerText = "";
-      // if(cards && localStorage.getItem('cards') === null) {
-      //   localStorage.setItem('cards', JSON.stringify(cards));
-      // } else if(cards === null) {
-      //   cards = Array.from(JSON.stringify(localStorage.getItem('cards')));
-      // }
-      cards = await setup_cards(
-        dataHandler.getCardsByBoardId,
-        userId,
-        boardId,
-        'Cards',
-        'cards'
-      );
-    }
-    if(cards) {
-      for(let card of cards) {
-        const cardBuilder = htmlFactory(htmlTemplates.card);
-        const content = cardBuilder(card);
-        domManager.addChild(
-          `.board-column-content[data-column-id="${card.status_id}"][data-board-id="${boardId}"]`,
-          content
-        );
-        if(card['user_id'] === userId) {
-          domManager.addEventListener(
-            `.card-remove[data-card-id="${card.id}"]`,
-            "click",
-            deleteButtonHandler
-          );
-          domManager.addEventListener(
-            `.card-archive[data-card-id="${card.id}"]`,
-            "click",
-            archiveButtonHandler
-          );
-          domManager.addEventListener(
-            `.card-title[data-card-board-id="${card.board_id}"][data-card-id="${card.id}"]`,
-            "click",
-            event => {
-              renameCardTitle(event, card);
+    getCards(userId, boardId, archived)
+      .then(cards => {
+        console.log(cards)
+        if(cards) {
+          for(let card of cards) {
+            const cardBuilder = htmlFactory(htmlTemplates.card);
+            const content = cardBuilder(card);
+            domManager.addChild(
+              `.board-column-content[data-column-id="${card.status_id}"][data-board-id="${boardId}"]`,
+              content
+            );
+            if(card['user_id'] === userId) {
+              domManager.addEventListener(
+                `.card-remove[data-card-id="${card.id}"]`,
+                "click",
+                deleteButtonHandler
+              );
+              domManager.addEventListener(
+                `.card-archive[data-card-id="${card.id}"]`,
+                "click",
+                archiveButtonHandler
+              );
+              domManager.addEventListener(
+                `.card-title[data-card-board-id="${card.board_id}"][data-card-id="${card.id}"]`,
+                "click",
+                event => {
+                  renameCardTitle(event, card);
+                }
+              );
             }
-          );
+          }
         }
-      }
-    }
+      })
+      .catch(err => console.log(err));
   },
   initDragAndDrop: function(boardId) {
     let current = null;
@@ -126,15 +100,53 @@ export let cardsManager = {
   },
 };
 
+async function getCards(userId, boardId, archived) {
+  if(archived === true) {
+    return await setup_cards(dataHandler.getArchivedCardsByBoardId, userId, boardId, 'Archived cards', 'archived_cards');
+  } else {
+    return await setup_cards(dataHandler.getCardsByBoardId, userId, boardId, 'Cards', 'cards');
+  }
+}
+
+export function showCreateCardForm(boardId) {
+  dataHandler.getStatuses(boardId)
+    .then(statuses => {
+      createCardStatus.innerHTML = '';
+      statuses.forEach(status => {
+        createCardStatus.innerHTML += `<option value="${status.id}">${status.title}</option>`
+      });
+    })
+    .catch(err => console.log(err));
+  showPopup(createCardPopup)
+}
+
 async function setup_cards(callback, userId, boardId, cards_header, localStorageKey) {
   let cards = await callback(userId, boardId);
-  document.querySelector(`.board-card-header[data-board-id="${boardId}"]`).innerText = cards_header;
-  if(cards && localStorage.getItem(localStorageKey) === null) {
-    localStorage.setItem(localStorageKey, JSON.stringify(cards));
-  } else if(cards === null) {
-    cards = Array.from(JSON.stringify(localStorage.getItem(localStorageKey)));
+  if(cards && cards.hasOwnProperty('message')) {
+    flashList.innerHTML = '';
+    flashList.innerHTML = `<li>${cards.message}</li>`;
+    showPopup(flashes);
+  } else if(cards) {
+    document.querySelector(`.board-card-header[data-board-id="${boardId}"]`).innerText = cards_header;
+    if(cards && localStorage.getItem(localStorageKey) === null) {
+      localStorage.setItem(localStorageKey, JSON.stringify(cards));
+    } else if(!cards && localStorage.getItem(localStorageKey) !== null) {
+      return Array.from(JSON.parse(localStorage.getItem(localStorageKey)));
+    }
+    return cards;
   }
-  return cards;
+  if(cards.hasOwnProperty('message')) {
+    if(userId === 0) {
+      if(!cards.message.startsWith('Cards')) {
+        boardsManager.closeBoards();
+        showPopup(loginPopup);
+      }
+    } else {
+      if(!cards.message.startsWith('Cards')) {
+        showCreateCardForm(boardId);
+      }
+    }
+  }
 }
 
 function archiveButtonHandler(clickEvent) {

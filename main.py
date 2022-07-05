@@ -8,6 +8,7 @@ import mimetypes
 
 import auth
 import queries
+from util import login_required
 
 load_dotenv()
 mimetypes.add_type('application/javascript', '.js')
@@ -53,6 +54,7 @@ def patch_rename_board(user_id: int, board_id: int):
 
 
 @app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/")
+@login_required
 def get_cards(user_id: int, board_id: int):
     """
     All cards that belongs to a board
@@ -60,7 +62,25 @@ def get_cards(user_id: int, board_id: int):
     :param board_id: id of the board
     :returns: json_object, status_code
     """
-    return jsonify(queries.get_cards_for_board(user_id, board_id)), 200
+    cards = queries.get_cards_for_board(user_id, board_id)
+    if cards:
+        return jsonify(cards), 200
+    return jsonify({'message': 'There\'s no cards. Add new one.'}), 404
+
+
+@app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/archived")
+@login_required
+def get_archived_cards(user_id: int, board_id: int):
+    """
+    Get all archived card that belongs to a board
+    :param user_id: id of the current user
+    :param board_id: id of the board
+    :returns: json_object, status_code
+    """
+    archived_cards = queries.get_archived_cards_for_board(user_id, board_id)
+    if archived_cards:
+        return jsonify(archived_cards), 200
+    return jsonify({'message': 'Cards not found.'}), 404
 
 
 @app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards", methods=['POST'])
@@ -241,20 +261,6 @@ def patch_archive_card(user_id: int, board_id: int, card_id: int):
     """
     queries.archive_card(board_id, card_id, user_id)
     return jsonify({'message': 'Operation done.'}), 200
-
-
-@app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/archived")
-def get_archived_cards(user_id: int, board_id: int):
-    """
-    Get all archived card that belongs to a board
-    :param user_id: id of the current user
-    :param board_id: id of the board
-    :returns: json_object, status_code
-    """
-    archived_cards = queries.get_archived_cards_for_board(user_id, board_id)
-    if archived_cards:
-        return jsonify(archived_cards), 200
-    return jsonify({'message': 'Cards not found.'}), 404
 
 
 @socketio.on('message')

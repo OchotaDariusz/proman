@@ -36,16 +36,16 @@
 
 {% if user %}
     <script>
-        let userId = {{ user.id }};
+      let userId = {{ user.id }};
     </script>
 {% else %}
     <script>
-        let userId = 0;
+      let userId = 0;
     </script>
 {% endif %}
 
 <script>
-    const host = '{{ host }}';
+  const host = '{{ host }}';
 </script>
 
 <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
