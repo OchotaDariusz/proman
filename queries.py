@@ -26,7 +26,8 @@ def get_boards(user_id):
     return data_manager.execute_select(
         """
         SELECT * FROM boards
-        WHERE public = TRUE OR public = FALSE AND user_id = %(user_id)s;
+        WHERE public = TRUE OR public = FALSE AND user_id = %(user_id)s
+        ORDER BY id
         """, variables={'user_id': user_id})
 
 
@@ -125,15 +126,16 @@ def add_new_user(new_user):
 
 
 def add_new_board(board_title, public, user_id):
-    isPublic = (public == 'public')
     new_board_id = data_manager.execute_select(
         """
         INSERT INTO boards (title, public, user_id)
-        VALUES (%(title)s, %(isPublic)s, %(user_id)s);
-        SELECT currval('boards_id_seq') AS id""", variables={'title': board_title, 'user_id': user_id, 'isPublic': isPublic}, fetchall=False)
+        VALUES (%(title)s, %(public_private)s, %(user_id)s);
+        SELECT currval('boards_id_seq') AS id""", variables={'title': board_title,
+                                                             'user_id': user_id,
+                                                             'public_private': public}, fetchall=False)
     new_board_id = int(new_board_id['id'])
     data_manager.execute_statement(
-        """INSERT INTO statuses (title, bound_to_board, status_order)
+        """INSERT INTO statuses (title, board_id, status_order)
         VALUES ('new', %(id)s, 1), ('in progress', %(id)s, 2), ('testing', %(id)s, 3), ('done', %(id)s, 4)
         """, variables={'id': new_board_id}
     )
@@ -177,7 +179,7 @@ def get_statuses(board_id=0):
     return data_manager.execute_select(
         """
         SELECT * FROM statuses
-        WHERE bound_to_board = %(board_id)s
+        WHERE board_id = %(board_id)s
         ORDER BY status_order
         """, variables={'board_id': board_id})
 
@@ -185,7 +187,7 @@ def get_statuses(board_id=0):
 def remove_column(board_id, column_id):
     data_manager.execute_statement(
         """DELETE FROM statuses CASCADE
-        WHERE bound_to_board = %(board_id)s AND id = %(column_id)s
+        WHERE board_id = %(board_id)s AND id = %(column_id)s
         """, variables={'board_id': board_id, 'column_id': column_id})
 
 
@@ -193,7 +195,7 @@ def get_last_status_order(board_id):
     last_status_order = data_manager.execute_select(
         """SELECT status_order
         FROM statuses
-        WHERE bound_to_board = %(board_id)s 
+        WHERE board_id = %(board_id)s 
         ORDER BY status_order DESC
         """, variables={'board_id': board_id}, fetchall=False)
     if last_status_order is None:
@@ -206,7 +208,7 @@ def get_last_status_order(board_id):
 def create_new_column(board_id, column_title):
     last_status_order = get_last_status_order(board_id)
     data_manager.execute_statement(
-        """INSERT INTO statuses(title, bound_to_board, status_order)
+        """INSERT INTO statuses(title, board_id, status_order)
         VALUES (%(title)s, %(board_id)s, %(status_order)s)
         """, variables={'title': column_title, 'board_id': board_id, 'status_order': last_status_order + 1})
 
@@ -215,14 +217,14 @@ def rename_column(board_id, column_id, column_title):
     data_manager.execute_statement(
         """UPDATE statuses
         SET title = %(column_title)s
-        WHERE bound_to_board = %(board_id)s AND id = %(column_id)s
+        WHERE board_id = %(board_id)s AND id = %(column_id)s
         """, variables={'board_id': board_id, 'column_id': column_id, 'column_title': column_title})
 
 
 def delete_board(board_id, user_id):
     data_manager.execute_statement(
         """DELETE FROM statuses
-        WHERE bound_to_board = %(board_id)s
+        WHERE board_id = %(board_id)s
         """, variables={'board_id': board_id})
     data_manager.execute_statement(
         """
