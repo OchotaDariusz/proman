@@ -2,19 +2,13 @@ import { dataHandler } from "../data/dataHandler.js";
 import { htmlFactory, htmlTemplates } from "../view/htmlFactory.js";
 import { domManager } from "../view/domManager.js";
 import { socket } from "../main.js";
-import { flashes, flashList, loginPopup, showPopup, createCardPopup, createCardStatus } from "../popup.js";
-import { boardsManager } from "./boardsManager.js";
+import { flashes, flashList, loginPopup, showPopup, closePopup, createCardPopup, createCardStatus } from "../popup.js";
+import { boardsManager, loadBoardContent } from "./boardsManager.js";
 
 export let cardsManager = {
   loadCards: async function(boardId, archived = false) {
-    domManager.addChild(
-      `.board-header[data-board-id="${boardId}"]`,
-      `<div class="board-card-header" data-board-id="${boardId}"></div>`,
-      'afterend'
-    );
     getCards(userId, boardId, archived)
       .then(cards => {
-        console.log(cards)
         if(cards) {
           for(let card of cards) {
             const cardBuilder = htmlFactory(htmlTemplates.card);
@@ -38,7 +32,11 @@ export let cardsManager = {
                 `.card-title[data-card-board-id="${card.board_id}"][data-card-id="${card.id}"]`,
                 "click",
                 event => {
-                  renameCardTitle(event, card);
+                  renameCardTitle(
+                    event,
+                    `.card-title[data-card-board-id="${card.board_id}"][data-card-id="${card.id}"]`,
+                    card.board_id,
+                    [card]);
                 }
               );
             }
@@ -81,12 +79,14 @@ export let cardsManager = {
       }
     }
   },
-  createCard: function(cardTitle, boardId, statusId) {
+  createCard: async function(cardTitle, boardId, statusId, userId) {
+    closePopup(createCardPopup);
+    showPopup(flashes);
     dataHandler.createNewCard(cardTitle, boardId, statusId, userId)
       .then(response => {
         flashList.innerHTML = '';
         flashList.innerHTML = `<li>${response.message}</li>`;
-        showPopup(flashes);
+        this.reloadBoards(userId);
       })
       .catch(err => console.log(err));
     socket.send(boardId);
@@ -109,7 +109,7 @@ async function getCards(userId, boardId, archived) {
 }
 
 export function showCreateCardForm(boardId) {
-  dataHandler.getStatuses(boardId)
+  dataHandler.getStatuses(userId, boardId)
     .then(statuses => {
       createCardStatus.innerHTML = '';
       statuses.forEach(status => {
@@ -117,17 +117,21 @@ export function showCreateCardForm(boardId) {
       });
     })
     .catch(err => console.log(err));
+  localStorage.setItem('boardId', boardId)
   showPopup(createCardPopup)
 }
 
 async function setup_cards(callback, userId, boardId, cards_header, localStorageKey) {
   let cards = await callback(userId, boardId);
+  const cardsHeader = document.querySelector(`.board-card-header[data-board-id="${boardId}"]`)
+  if(cardsHeader) {
+    cardsHeader.innerText = cards_header;
+  }
   if(cards && cards.hasOwnProperty('message')) {
     flashList.innerHTML = '';
     flashList.innerHTML = `<li>${cards.message}</li>`;
     showPopup(flashes);
   } else if(cards) {
-    document.querySelector(`.board-card-header[data-board-id="${boardId}"]`).innerText = cards_header;
     if(cards && localStorage.getItem(localStorageKey) === null) {
       localStorage.setItem(localStorageKey, JSON.stringify(cards));
     } else if(!cards && localStorage.getItem(localStorageKey) !== null) {
@@ -138,12 +142,11 @@ async function setup_cards(callback, userId, boardId, cards_header, localStorage
   if(cards.hasOwnProperty('message')) {
     if(userId === 0) {
       if(!cards.message.startsWith('Cards')) {
-        boardsManager.closeBoards();
-        showPopup(loginPopup);
-      }
-    } else {
-      if(!cards.message.startsWith('Cards')) {
-        showCreateCardForm(boardId);
+        localStorage.setItem('boardId', boardId);
+        boardsManager.closeBoards()
+          .then(() => showPopup(loginPopup))
+          .then()
+          .catch(err => console.log(err));
       }
     }
   }
@@ -171,50 +174,60 @@ function buttonHandler(callback, clickEvent, confirmationMessage) {
   if(confirm(confirmationMessage)) {
     callback(boardId, cardId, userId)
       .then(response => {
-        console.log(response)
+        console.log('kurwa', response)
+        closePopup(createCardPopup);
+        showPopup(flashes);
         flashList.innerHTML = '';
         flashList.innerHTML = `<li>${response.message}</li>`;
-        showPopup(flashes);
       })
       .catch(err => console.log(err));
     socket.send(boardId);
   }
 }
 
-const saveNewCardTitle = (submitEvent, event, card, newTitle, newTitleForm) => {
-  submitEvent.preventDefault();
-  event.target.innerText = newTitle.value;
-  newTitleForm.outerHTML = event.target.outerHTML;
-  dataHandler.renameCard(card.board_id, card.id, newTitle.value, userId)
-    .then(response => {
-      flashList.innerHTML = '';
-      flashList.innerHTML = `<li>${response.message}</li>`;
-      showPopup(flashes);
-    })
-    .catch(err => console.log(err));
-  newTitleForm.reset();
-  domManager.addEventListener(
-    `.card-title[data-card-board-id="${card.board_id}"][data-card-id="${card.id}"]`,
-    "click",
-    event => {
-      renameCardTitle(event, card);
-    }
-  );
-};
+// const saveNewCardTitle = (submitEvent, event, card, newTitle, newTitleForm, save) => {
+//   submitEvent.preventDefault();
+//   event.target.innerText = newTitle.value;
+//   newTitleForm.outerHTML = event.target.outerHTML;
+//   if(save) {
+//     dataHandler.renameCard(card.board_id, card.id, newTitle.value, userId)
+//       .then(response => {
+//         flashList.innerHTML = '';
+//         flashList.innerHTML = `<li>${response.message}</li>`;
+//         showPopup(flashes);
+//       })
+//       .catch(err => console.log(err));
+//   }
+//   newTitleForm.reset();
+//   domManager.addEventListener(
+//     `.card-title[data-card-board-id="${card.board_id}"][data-card-id="${card.id}"]`,
+//     "click",
+//     event => {
+//       renameCardTitle(event, card);
+//     }
+//   );
+// };
 
-function renameCardTitle(event, card) {
+function renameCardTitle(event, selector, socketMsg, elements) {
   const title = event.target.innerText;
   event.target.outerHTML = `<form id="new-card-title-form" style="display: inline-block;" class="card-title"><input type="text" id="new-card-title" value="${title}"><button type="submit">save</button></form>`;
   const newTitleForm = document.querySelector('#new-card-title-form');
   const newTitle = document.querySelector('#new-card-title');
   newTitle.focus();
   newTitleForm.addEventListener('submit', submitEvent => {
-    saveNewCardTitle(submitEvent, event, card, newTitle, newTitleForm);
-    socket.send(card.board_id);
+    if(title !== newTitle.value) {
+      console.log(title, newTitle.value)
+      domManager.saveNewTitle(submitEvent, event, newTitle, newTitleForm, dataHandler.renameCard, renameCardTitle, socketMsg, true, selector, elements);
+      socket.send(socketMsg);
+    }
+    domManager.saveNewTitle(submitEvent, event, newTitle, newTitleForm, dataHandler.renameCard, renameCardTitle, socketMsg, false, selector, elements);
   });
   newTitleForm.addEventListener('focusout', submitEvent => {
-    saveNewCardTitle(submitEvent, event, card, newTitle, newTitleForm);
-    socket.send(card.board_id);
+    if(title !== newTitle.value) {
+      domManager.saveNewTitle(submitEvent, event, newTitle, newTitleForm, dataHandler.renameCard, renameCardTitle, socketMsg, true, selector, elements);
+      socket.send(socketMsg);
+    }
+    domManager.saveNewTitle(submitEvent, event, newTitle, newTitleForm, dataHandler.renameCard, renameCardTitle, socketMsg, false, selector, elements);
   });
 }
 

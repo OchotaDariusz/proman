@@ -175,20 +175,23 @@ def remove_card(board_id, card_id, user_id):
         """, variables={'board_id': board_id, 'card_id': card_id, 'user_id': user_id})
 
 
-def get_statuses(board_id=0):
+def get_statuses(user_id, board_id=0):
     return data_manager.execute_select(
         """
         SELECT * FROM statuses
-        WHERE board_id = %(board_id)s
+        WHERE board_id = %(board_id)s AND %(user_id)s > 0
         ORDER BY status_order
-        """, variables={'board_id': board_id})
+        """, variables={'board_id': board_id, 'user_id': user_id})
 
 
-def remove_column(board_id, column_id):
+def remove_column(user_id, board_id, column_id):
     data_manager.execute_statement(
         """DELETE FROM statuses CASCADE
-        WHERE board_id = %(board_id)s AND id = %(column_id)s
-        """, variables={'board_id': board_id, 'column_id': column_id})
+        WHERE id IN
+        (SELECT statuses.id FROM statuses
+        JOIN boards on boards.id = statuses.board_id
+        WHERE boards.id = %(board_id)s AND boards.user_id = %(user_id)s AND statuses.id = %(column_id)s)
+        """, variables={'board_id': board_id, 'user_id': user_id, 'column_id': column_id})
 
 
 def get_last_status_order(board_id):
@@ -205,20 +208,22 @@ def get_last_status_order(board_id):
     return last_status_order
 
 
-def create_new_column(board_id, column_title):
-    last_status_order = get_last_status_order(board_id)
-    data_manager.execute_statement(
-        """INSERT INTO statuses(title, board_id, status_order)
-        VALUES (%(title)s, %(board_id)s, %(status_order)s)
-        """, variables={'title': column_title, 'board_id': board_id, 'status_order': last_status_order + 1})
+def create_new_column(user_id, board_id, column_title):
+    if user_id != 0:
+        last_status_order = get_last_status_order(board_id)
+        data_manager.execute_statement(
+            """INSERT INTO statuses(title, board_id, status_order)
+            VALUES (%(title)s, %(board_id)s, %(status_order)s)
+            """, variables={'title': column_title, 'board_id': board_id, 'status_order': last_status_order + 1})
 
 
-def rename_column(board_id, column_id, column_title):
+def rename_column(user_id, board_id, column_id, column_title):
     data_manager.execute_statement(
         """UPDATE statuses
         SET title = %(column_title)s
-        WHERE board_id = %(board_id)s AND id = %(column_id)s
-        """, variables={'board_id': board_id, 'column_id': column_id, 'column_title': column_title})
+        WHERE board_id = %(board_id)s AND id = %(column_id)s AND %(user_id)s > 0
+        """, variables={'board_id': board_id, 'column_id': column_id,
+                        'column_title': column_title, 'user_id': int(user_id)})
 
 
 def delete_board(board_id, user_id):

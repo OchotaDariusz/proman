@@ -42,6 +42,7 @@ def get_boards(user_id: int):
 
 
 @app.route("/api/users/<int:user_id>/boards/<int:board_id>", methods=['PATCH'])
+@login_required
 def patch_rename_board(user_id: int, board_id: int):
     """
     Rename the board
@@ -169,48 +170,61 @@ def post_logout():
     return jsonify({'message': 'You need to login first.'}), 403
 
 
-@app.route('/api/statuses/<int:board_id>')
-def get_statuses(board_id: int):
+@app.route('/api/users/<int:user_id>/statuses/<int:board_id>')
+def get_statuses(user_id: int, board_id: int):
     """
     Get all statuses(columns) that belongs to a board
+    :param user_id: id of the current user
     :param board_id: id of the board
     :returns: json_object, status_code
     """
-    return jsonify(queries.get_statuses(board_id)), 200
+    return jsonify(queries.get_statuses(user_id, board_id)), 200
 
 
-@app.route('/api/statuses/<int:board_id>', methods=['POST'])
-def post_create_column(board_id: int):
+@app.route('/api/users/<int:user_id>/statuses/<int:board_id>', methods=['POST'])
+def post_create_column(user_id: int, board_id: int):
     """
     Create new status(column) and add it into a board
+    :param user_id: id of the current user
     :param board_id: id of the board
     :returns: json_object, status_code
     """
-    queries.create_new_column(board_id, request.get_json().get('columnTitle'))
-    return jsonify({'message': 'Successfully created.'}), 201
+    board = queries.get_board(user_id, board_id)
+    if board['user_id'] == user_id:
+        queries.create_new_column(user_id, board_id, request.get_json().get('columnTitle'))
+        return jsonify({'message': 'Successfully created.'}), 201
+    return jsonify({'message': 'You can\'t add new columns into the other users boards.'}), 401
 
 
-@app.route('/api/statuses/<int:board_id>', methods=['DELETE'])
-def delete_status(board_id: int):
+@app.route('/api/users/<int:user_id>/statuses/<int:board_id>', methods=['DELETE'])
+def delete_column(user_id: int, board_id: int):
     """
     Delete status(column) from a board
+    :param user_id: id of the current user
     :param board_id: id of the board
     :returns: json_object, status_code
     """
-    queries.remove_column(board_id, request.get_json().get('columnId'))
-    return jsonify({'message': 'Successfully removed.'}), 200
+    board = queries.get_board(user_id, board_id)
+    if board['user_id'] == user_id:
+        queries.remove_column(user_id, board_id, request.get_json().get('columnId'))
+        return jsonify({'message': 'Successfully removed.'}), 200
+    return jsonify({'message': 'You can\'t remove columns from the other users boards.'}), 401
 
 
-@app.route('/api/statuses/<int:board_id>', methods=['PATCH'])
-def patch_rename_column(board_id: int):
+@app.route('/api/users/<int:user_id>/statuses/<int:board_id>', methods=['PATCH'])
+def patch_rename_column(user_id: int, board_id: int):
     """
     Rename status(column) that belongs to a board
+    :param user_id: id of the current user
     :param board_id: id of the board
     :returns: json_object, status_code
     """
-    data = request.get_json()
-    queries.rename_column(board_id, data['columnId'], data['columnTitle'])
-    return jsonify({'message': 'Successfully renamed.'}), 200
+    board = queries.get_board(user_id, board_id)
+    if board['user_id'] == user_id:
+        data = request.get_json()
+        queries.rename_column(user_id, board_id, data['columnId'], data['columnTitle'])
+        return jsonify({'message': 'Successfully renamed.'}), 200
+    return jsonify({'message': 'You can\'t rename columns from the other users boards.'}), 401
 
 
 @app.route("/api/users/<int:user_id>/boards", methods=["POST"])
