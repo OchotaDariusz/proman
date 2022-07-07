@@ -28,6 +28,7 @@ export let dataHandler = {
       console.log((numberOfBoardsToSync) ? `Need to sync ${numberOfBoardsToSync} boards.` : 'No need to sync boards.');
       console.log('boards to sync from local storage:', boardsToSync);
 
+      //TODO add timestamp as unique id <3
       return boards;
     } else if(boards === null && localStorage.getItem('boards') !== null) {
       boards = Array.from(JSON.parse(localStorage.getItem('boards')));

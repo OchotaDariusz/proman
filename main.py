@@ -28,96 +28,7 @@ def index():
     """
     return render_template('index.html',
                            user=queries.get_user_by_username(session.get('username')),
-                           host=environ.get('HOST')), 200
-
-
-@app.route("/api/users/<int:user_id>/boards")
-def get_boards(user_id: int):
-    """
-    All the boards
-    :param user_id: id of the current user
-    :returns: json_object, status_code
-    """
-    return jsonify(queries.get_boards(user_id)), 200
-
-
-@app.route("/api/users/<int:user_id>/boards/<int:board_id>", methods=['PATCH'])
-@login_required
-def patch_rename_board(user_id: int, board_id: int):
-    """
-    Rename the board
-    :param user_id: id of the current user
-    :param board_id: id of the board
-    :returns: json_object, status_code
-    """
-    queries.rename_board(board_id, request.get_json().get('boardTitle'), user_id)
-    return jsonify({'message': 'Successfully renamed.'}), 200
-
-
-@app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/")
-@login_required
-def get_cards(user_id: int, board_id: int):
-    """
-    All cards that belongs to a board
-    :param user_id: id of the current user
-    :param board_id: id of the board
-    :returns: json_object, status_code
-    """
-    cards = queries.get_cards_for_board(user_id, board_id)
-    if cards:
-        return jsonify(cards), 200
-    return jsonify({'message': 'There\'s no cards. Add new one.'}), 404
-
-
-@app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/archived")
-@login_required
-def get_archived_cards(user_id: int, board_id: int):
-    """
-    Get all archived card that belongs to a board
-    :param user_id: id of the current user
-    :param board_id: id of the board
-    :returns: json_object, status_code
-    """
-    archived_cards = queries.get_archived_cards_for_board(user_id, board_id)
-    if archived_cards:
-        return jsonify(archived_cards), 200
-    return jsonify({'message': 'Cards not found.'}), 404
-
-
-@app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards", methods=['POST'])
-def post_create_card(user_id: int, board_id: int):
-    """
-    Create new card for board
-    :param user_id: id of the current user
-    :param board_id: id of the board
-    :returns: json_object, status_code
-    """
-    queries.create_new_card(board_id, request.get_json(), user_id)
-    return jsonify({'message': 'Successfully created.'}), 201
-
-
-@app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards", methods=['PATCH'])
-def patch_update_cards(user_id: int, board_id: int):
-    """
-    Updates all cards that belongs to a board
-    :param user_id: id of the current user
-    :param board_id: id of the board
-    :returns: json_object, status_code
-    """
-    return jsonify(queries.update_cards(board_id, user_id, request.get_json())), 200
-
-
-@app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/<int:card_id>", methods=['DELETE'])
-def delete_card(user_id: int, board_id: int, card_id: int):
-    """
-    Remove card from board
-    :param user_id: id of the current user
-    :param board_id: id of the board
-    :param card_id: id of the card
-    :returns: json_object, status_code
-    """
-    queries.remove_card(board_id, card_id, user_id)
-    return jsonify({'message': 'Successfully removed.'}), 200
+                           host=environ.get('SOCKET_HOST')), 200
 
 
 @app.route('/register', methods=['POST'])
@@ -159,29 +70,177 @@ def post_login():
 
 
 @app.route('/logout', methods=['POST'])
+@login_required
 def post_logout():
     """
     Logout user
     :returns: json_object, status_code
     """
-    if 'username' in session:
-        session.clear()
-        return jsonify({'message': 'Logged out successfully.'}), 200
-    return jsonify({'message': 'You need to login first.'}), 403
+    session.clear()
+    return jsonify({'message': 'Logged out successfully.'}), 200
+
+
+@app.route("/api/users/<int:user_id>/boards")
+@login_required
+def get_boards(user_id: int):
+    """
+    All the boards
+    :param user_id: id of the current user
+    :returns: json_object, status_code
+    """
+    return jsonify(queries.get_boards(user_id)), 200
+
+
+@app.route("/api/users/<int:user_id>/boards", methods=["POST"])
+@login_required
+def post_create_board(user_id: int):
+    """
+    Create new board
+    :param user_id: id of the current user
+    :returns: json_object, status_code
+    """
+    data = request.get_json()
+    queries.add_new_board(data.get('boardTitle'), (data.get('public_private') == 'public'), user_id)
+    return jsonify({'message': 'Successfully created.'}), 201
+
+
+@app.route("/api/users/<int:user_id>/boards/<int:board_id>", methods=['PATCH'])
+@login_required
+def patch_rename_board(user_id: int, board_id: int):
+    """
+    Rename the board
+    :param user_id: id of the current user
+    :param board_id: id of the board
+    :returns: json_object, status_code
+    """
+    queries.rename_board(board_id, request.get_json().get('boardTitle'), user_id)
+    return jsonify({'message': 'Successfully renamed.'}), 200
+
+
+@app.route("/api/users/<int:user_id>/boards/<int:board_id>", methods=["DELETE"])
+@login_required
+def delete_board(user_id: int, board_id: int):
+    """
+    Remove a board
+    :param user_id: id of the current user
+    :param board_id: id of the board
+    :returns: json_object, status_code
+    """
+    queries.delete_board(board_id, user_id)
+    return jsonify({'message': 'Successfully removed.'}), 200
+
+
+@app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/")
+@login_required
+def get_cards(user_id: int, board_id: int):
+    """
+    All cards that belongs to a board
+    :param user_id: id of the current user
+    :param board_id: id of the board
+    :returns: json_object, status_code
+    """
+    cards = queries.get_cards_for_board(user_id, board_id)
+    if cards:
+        return jsonify(cards), 200
+    return jsonify({'message': 'There\'s no cards. Add new one.'}), 404
+
+
+@app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/archived")
+@login_required
+def get_archived_cards(user_id: int, board_id: int):
+    """
+    Get all archived card that belongs to a board
+    :param user_id: id of the current user
+    :param board_id: id of the board
+    :returns: json_object, status_code
+    """
+    archived_cards = queries.get_archived_cards_for_board(user_id, board_id)
+    if archived_cards:
+        return jsonify(archived_cards), 200
+    return jsonify({'message': 'Cards not found.'}), 404
+
+
+@app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards", methods=['POST'])
+@login_required
+def post_create_card(user_id: int, board_id: int):
+    """
+    Create new card for board
+    :param user_id: id of the current user
+    :param board_id: id of the board
+    :returns: json_object, status_code
+    """
+    queries.create_new_card(board_id, request.get_json(), user_id)
+    return jsonify({'message': 'Successfully created.'}), 201
+
+
+@app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/<int:card_id>", methods=['PATCH'])
+@login_required
+def patch_rename_card(user_id: int, board_id: int, card_id: int):
+    """
+    Rename a card
+    :param user_id: id of the current user
+    :param board_id: id of the board
+    :param card_id: id of the card
+    :returns: json_object, status_code
+    """
+    queries.rename_card(board_id, card_id, request.get_json()['cardTitle'], user_id)
+    return jsonify({'message': 'Successfully renamed.'}), 200
+
+
+@app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/<int:card_id>/archive", methods=['PATCH'])
+@login_required
+def patch_archive_and_unarchive_card(user_id: int, board_id: int, card_id: int):
+    """
+    Archive/unarchive a card
+    :param user_id: id of the current user
+    :param board_id: id of the board
+    :param card_id: id of the card
+    :returns: json_object, status_code
+    """
+    queries.archive_and_unarchive_card(board_id, card_id, user_id)
+    return jsonify({'message': 'Operation done.'}), 200
+
+
+@app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards", methods=['PATCH'])
+@login_required
+def patch_update_cards(user_id: int, board_id: int):
+    """
+    Updates all cards that belongs to a board
+    :param user_id: id of the current user
+    :param board_id: id of the board
+    :returns: json_object, status_code
+    """
+    return jsonify(queries.update_cards(board_id, user_id, request.get_json())), 200
+
+
+@app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/<int:card_id>", methods=['DELETE'])
+@login_required
+def delete_card(user_id: int, board_id: int, card_id: int):
+    """
+    Remove card from board
+    :param user_id: id of the current user
+    :param board_id: id of the board
+    :param card_id: id of the card
+    :returns: json_object, status_code
+    """
+    queries.remove_card(board_id, card_id, user_id)
+    return jsonify({'message': 'Successfully removed.'}), 200
 
 
 @app.route('/api/users/<int:user_id>/statuses/<int:board_id>')
-def get_statuses(user_id: int, board_id: int):
+@login_required
+def get_columns(user_id: int, board_id: int):
     """
     Get all statuses(columns) that belongs to a board
     :param user_id: id of the current user
     :param board_id: id of the board
     :returns: json_object, status_code
     """
-    return jsonify(queries.get_statuses(user_id, board_id)), 200
+    return jsonify(queries.get_columns(user_id, board_id)), 200
 
 
 @app.route('/api/users/<int:user_id>/statuses/<int:board_id>', methods=['POST'])
+@login_required
 def post_create_column(user_id: int, board_id: int):
     """
     Create new status(column) and add it into a board
@@ -196,22 +255,8 @@ def post_create_column(user_id: int, board_id: int):
     return jsonify({'message': 'You can\'t add new columns into the other users boards.'}), 401
 
 
-@app.route('/api/users/<int:user_id>/statuses/<int:board_id>', methods=['DELETE'])
-def delete_column(user_id: int, board_id: int):
-    """
-    Delete status(column) from a board
-    :param user_id: id of the current user
-    :param board_id: id of the board
-    :returns: json_object, status_code
-    """
-    board = queries.get_board(user_id, board_id)
-    if board['user_id'] == user_id:
-        queries.remove_column(user_id, board_id, request.get_json().get('columnId'))
-        return jsonify({'message': 'Successfully removed.'}), 200
-    return jsonify({'message': 'You can\'t remove columns from the other users boards.'}), 401
-
-
 @app.route('/api/users/<int:user_id>/statuses/<int:board_id>', methods=['PATCH'])
+@login_required
 def patch_rename_column(user_id: int, board_id: int):
     """
     Rename status(column) that belongs to a board
@@ -227,54 +272,20 @@ def patch_rename_column(user_id: int, board_id: int):
     return jsonify({'message': 'You can\'t rename columns from the other users boards.'}), 401
 
 
-@app.route("/api/users/<int:user_id>/boards", methods=["POST"])
-def post_create_board(user_id: int):
+@app.route('/api/users/<int:user_id>/statuses/<int:board_id>', methods=['DELETE'])
+@login_required
+def delete_column(user_id: int, board_id: int):
     """
-    Create new board
-    :param user_id: id of the current user
-    :returns: json_object, status_code
-    """
-    data = request.get_json()
-    queries.add_new_board(data.get('boardTitle'), (data.get('public_private') == 'public'), user_id)
-    return jsonify({'message': 'Successfully created.'}), 201
-
-
-@app.route("/api/users/<int:user_id>/boards/<int:board_id>", methods=["DELETE"])
-def delete_board(user_id: int, board_id: int):
-    """
-    Remove a board
+    Delete status(column) from a board
     :param user_id: id of the current user
     :param board_id: id of the board
     :returns: json_object, status_code
     """
-    queries.delete_board(board_id, user_id)
-    return jsonify({'message': 'Successfully removed.'}), 200
-
-
-@app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/<int:card_id>", methods=['PATCH'])
-def patch_rename_card(user_id: int, board_id: int, card_id: int):
-    """
-    Rename a card
-    :param user_id: id of the current user
-    :param board_id: id of the board
-    :param card_id: id of the card
-    :returns: json_object, status_code
-    """
-    queries.rename_card(board_id, card_id, request.get_json()['cardTitle'], user_id)
-    return jsonify({'message': 'Successfully renamed.'}), 200
-
-
-@app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/<int:card_id>/archive", methods=['PATCH'])
-def patch_archive_card(user_id: int, board_id: int, card_id: int):
-    """
-    Archive/unarchive a card
-    :param user_id: id of the current user
-    :param board_id: id of the board
-    :param card_id: id of the card
-    :returns: json_object, status_code
-    """
-    queries.archive_card(board_id, card_id, user_id)
-    return jsonify({'message': 'Operation done.'}), 200
+    board = queries.get_board(user_id, board_id)
+    if board['user_id'] == user_id:
+        queries.remove_column(user_id, board_id, request.get_json().get('columnId'))
+        return jsonify({'message': 'Successfully removed.'}), 200
+    return jsonify({'message': 'You can\'t remove columns from the other users boards.'}), 401
 
 
 @socketio.on('message')
