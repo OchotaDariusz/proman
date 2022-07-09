@@ -28,36 +28,43 @@ DROP TABLE IF EXISTS users CASCADE;
 
 CREATE TABLE statuses
 (
-    id           SERIAL PRIMARY KEY NOT NULL,
-    title        VARCHAR(20)        NOT NULL,
-    board_id     INTEGER            NOT NULL,
-    status_order INTEGER            NOT NULL
+    id             SERIAL PRIMARY KEY          NOT NULL,
+    title          VARCHAR(20)                 NOT NULL,
+    board_id       INTEGER                     NOT NULL,
+    status_order   INTEGER                     NOT NULL,
+    creation_time  TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    last_edit_time TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );
 
 CREATE TABLE boards
 (
-    id      SERIAL PRIMARY KEY NOT NULL,
-    title   VARCHAR(20)        NOT NULL,
-    public  BOOLEAN            NOT NULL,
-    user_id INTEGER            NOT NULL
+    id             SERIAL PRIMARY KEY          NOT NULL,
+    title          VARCHAR(20)                 NOT NULL,
+    public         BOOLEAN                     NOT NULL,
+    user_id        INTEGER                     NOT NULL,
+    creation_time  TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    last_edit_time TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );
 
 CREATE TABLE cards
 (
-    id         SERIAL PRIMARY KEY NOT NULL,
-    board_id   INTEGER            NOT NULL,
-    status_id  INTEGER            NOT NULL,
-    title      VARCHAR(20)        NOT NULL,
-    card_order INTEGER            NOT NULL,
-    user_id    INTEGER            NOT NULL,
-    archived   BOOLEAN            NOT NULL
+    id             SERIAL PRIMARY KEY          NOT NULL,
+    board_id       INTEGER                     NOT NULL,
+    status_id      INTEGER                     NOT NULL,
+    title          VARCHAR(20)                 NOT NULL,
+    card_order     INTEGER                     NOT NULL,
+    user_id        INTEGER                     NOT NULL,
+    archived       BOOLEAN                     NOT NULL,
+    creation_time  TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    last_edit_time TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );
 
 CREATE TABLE users
 (
-    id       SERIAL PRIMARY KEY NOT NULL,
-    username VARCHAR(200)       NOT NULL,
-    password VARCHAR(200)       NOT NULL
+    id                SERIAL PRIMARY KEY          NOT NULL,
+    username          VARCHAR(200)                NOT NULL,
+    password          VARCHAR(200)                NOT NULL,
+    registration_time TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );
 
 ---
@@ -65,76 +72,80 @@ CREATE TABLE users
 ---
 
 INSERT INTO statuses
-VALUES (nextval('statuses_id_seq'), 'New', 1, 1);
+VALUES (nextval('statuses_id_seq'), 'New', 1, 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO statuses
-VALUES (nextval('statuses_id_seq'), 'In progress', 1, 2);
+VALUES (nextval('statuses_id_seq'), 'In progress', 1, 2, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO statuses
-VALUES (nextval('statuses_id_seq'), 'Testing', 1, 3);
+VALUES (nextval('statuses_id_seq'), 'Testing', 1, 3, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO statuses
-VALUES (nextval('statuses_id_seq'), 'Done', 1, 4);
+VALUES (nextval('statuses_id_seq'), 'Done', 1, 4, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO statuses
-VALUES (nextval('statuses_id_seq'), 'Tasks', 2, 1);
+VALUES (nextval('statuses_id_seq'), 'Tasks', 2, 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO statuses
-VALUES (nextval('statuses_id_seq'), 'Todo', 2, 2);
+VALUES (nextval('statuses_id_seq'), 'Todo', 2, 2, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO statuses
-VALUES (nextval('statuses_id_seq'), 'Bugs', 2, 3);
+VALUES (nextval('statuses_id_seq'), 'Bugs', 2, 3, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO statuses
-VALUES (nextval('statuses_id_seq'), 'Fixed', 2, 4);
+VALUES (nextval('statuses_id_seq'), 'Fixed', 2, 4, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO statuses
-VALUES (nextval('statuses_id_seq'), 'Broken', 2, 5);
+VALUES (nextval('statuses_id_seq'), 'Broken', 2, 5, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO statuses
-VALUES (nextval('statuses_id_seq'), 'Bugs', 3, 1);
+VALUES (nextval('statuses_id_seq'), 'Bugs', 3, 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO statuses
-VALUES (nextval('statuses_id_seq'), 'Fixed', 3, 2);
+VALUES (nextval('statuses_id_seq'), 'Fixed', 3, 2, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO statuses
-VALUES (nextval('statuses_id_seq'), 'Reported Bugs', 4, 1);
+VALUES (nextval('statuses_id_seq'), 'Reported Bugs', 4, 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO statuses
-VALUES (nextval('statuses_id_seq'), 'Critical Bugs', 4, 2);
+VALUES (nextval('statuses_id_seq'), 'Critical Bugs', 4, 2, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO statuses
-VALUES (nextval('statuses_id_seq'), 'Fixed Bugs', 4, 3);
+VALUES (nextval('statuses_id_seq'), 'Fixed Bugs', 4, 3, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 
 INSERT INTO boards
-VALUES (nextval('boards_id_seq'), 'Standard Board', TRUE, 1);
+VALUES (nextval('boards_id_seq'), 'Standard Board', TRUE, 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO boards
-VALUES (nextval('boards_id_seq'), 'Public Board', TRUE, 1);
+VALUES (nextval('boards_id_seq'), 'Public Board', TRUE, 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO boards
-VALUES (nextval('boards_id_seq'), 'Private Board 1', FALSE, 1);
+VALUES (nextval('boards_id_seq'), 'Private Board 1', FALSE, 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO boards
-VALUES (nextval('boards_id_seq'), 'Test Public Board', TRUE, 2);
+VALUES (nextval('boards_id_seq'), 'Test Public Board', TRUE, 2, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 
 INSERT INTO cards
-VALUES (nextval('cards_id_seq'), 1, 1, 'Update', 1, 1, TRUE);
+VALUES (nextval('cards_id_seq'), 1, 1, 'Update', 1, 1, TRUE, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO cards
-VALUES (nextval('cards_id_seq'), 1, 1, 'Verify LoadedContent', 1, 1, FALSE);
+VALUES (nextval('cards_id_seq'), 1, 1, 'Verify LoadedContent', 1, 1, FALSE, '2022-01-01 00:00:00',
+        '2022-01-01 00:00:00');
 INSERT INTO cards
-VALUES (nextval('cards_id_seq'), 1, 1, 'Live Synchronisation', 2, 1, FALSE);
+VALUES (nextval('cards_id_seq'), 1, 1, 'Live Synchronisation', 2, 1, FALSE, '2022-01-01 00:00:00',
+        '2022-01-01 00:00:00');
 INSERT INTO cards
-VALUES (nextval('cards_id_seq'), 1, 2, 'Upgrading', 1, 1, FALSE);
+VALUES (nextval('cards_id_seq'), 1, 2, 'Upgrading', 1, 1, FALSE, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO cards
-VALUES (nextval('cards_id_seq'), 1, 3, 'All', 1, 1, FALSE);
+VALUES (nextval('cards_id_seq'), 1, 3, 'All', 1, 1, FALSE, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO cards
-VALUES (nextval('cards_id_seq'), 1, 4, 'Add/Remove Boards', 1, 1, FALSE);
+VALUES (nextval('cards_id_seq'), 1, 4, 'Add/Remove Boards', 1, 1, FALSE, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO cards
-VALUES (nextval('cards_id_seq'), 1, 4, 'Add/Remove Cards', 2, 1, FALSE);
+VALUES (nextval('cards_id_seq'), 1, 4, 'Add/Remove Cards', 2, 1, FALSE, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO cards
-VALUES (nextval('cards_id_seq'), 1, 4, 'Add/Remove Columns', 3, 1, FALSE);
+VALUES (nextval('cards_id_seq'), 1, 4, 'Add/Remove Columns', 3, 1, FALSE, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO cards
-VALUES (nextval('cards_id_seq'), 2, 5, 'Refactor', 1, 1, FALSE);
+VALUES (nextval('cards_id_seq'), 2, 5, 'Refactor', 1, 1, FALSE, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO cards
-VALUES (nextval('cards_id_seq'), 2, 5, 'Offline mode', 2, 1, FALSE);
+VALUES (nextval('cards_id_seq'), 2, 5, 'Offline mode', 2, 1, FALSE, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO cards
-VALUES (nextval('cards_id_seq'), 2, 6, 'PWA', 2, 1, FALSE);
+VALUES (nextval('cards_id_seq'), 2, 6, 'PWA', 2, 1, FALSE, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO cards
-VALUES (nextval('cards_id_seq'), 2, 7, 'Reloading', 1, 1, FALSE);
+VALUES (nextval('cards_id_seq'), 2, 7, 'Reloading', 1, 1, FALSE, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO cards
-VALUES (nextval('cards_id_seq'), 2, 8, 'WebSockets', 1, 1, FALSE);
+VALUES (nextval('cards_id_seq'), 2, 8, 'WebSockets', 1, 1, FALSE, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 INSERT INTO cards
-VALUES (nextval('cards_id_seq'), 2, 8, 'Board Privacy', 2, 1, FALSE);
+VALUES (nextval('cards_id_seq'), 2, 8, 'Board Privacy', 2, 1, FALSE, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
 
 INSERT INTO users
-VALUES (nextval('users_id_seq'), 'ask@mate.com', '$2b$12$/43VzFMeu2NBxkCSWb/G/edG.p3HnfYpnAE02DxZMym1AOutUH4aO');
+VALUES (nextval('users_id_seq'), 'ask@mate.com', '$2b$12$/43VzFMeu2NBxkCSWb/G/edG.p3HnfYpnAE02DxZMym1AOutUH4aO',
+        '2022-01-01 00:00:00');
 INSERT INTO users
-VALUES (nextval('users_id_seq'), 'test@test.com', '$2b$12$lDUSZB8DlTWMxXtV0fh.weie7ZzQcwCL7XNAi7V3rYerNWAWGlGhm');
+VALUES (nextval('users_id_seq'), 'test@test.com', '$2b$12$lDUSZB8DlTWMxXtV0fh.weie7ZzQcwCL7XNAi7V3rYerNWAWGlGhm',
+        '2022-01-01 00:00:00');
 
 ---
 --- add constraints

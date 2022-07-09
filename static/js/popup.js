@@ -147,9 +147,7 @@ if(createCardForm) {
     localStorage.removeItem('boardId');
 
     cardsManager.createCard(cardTitle, boardId, cardStatus, userId)
-      .then(async () => {
-        createCardForm.reset();
-      })
+      .then(() => createCardForm.reset())
       .catch(err => console.log(err));
   });
 }

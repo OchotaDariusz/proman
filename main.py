@@ -8,7 +8,6 @@ import mimetypes
 
 import auth
 import queries
-from util import login_required
 
 load_dotenv()
 mimetypes.add_type('application/javascript', '.js')
@@ -28,7 +27,7 @@ def index():
     """
     return render_template('index.html',
                            user=queries.get_user_by_username(session.get('username')),
-                           host=environ.get('SOCKET_HOST')), 200
+                           socket_host=environ.get('SOCKET_HOST')), 200
 
 
 @app.route('/register', methods=['POST'])
@@ -70,7 +69,7 @@ def post_login():
 
 
 @app.route('/logout', methods=['POST'])
-@login_required
+@auth.login_required
 def post_logout():
     """
     Logout user
@@ -81,7 +80,6 @@ def post_logout():
 
 
 @app.route("/api/users/<int:user_id>/boards")
-@login_required
 def get_boards(user_id: int):
     """
     All the boards
@@ -92,7 +90,7 @@ def get_boards(user_id: int):
 
 
 @app.route("/api/users/<int:user_id>/boards", methods=["POST"])
-@login_required
+@auth.login_required
 def post_create_board(user_id: int):
     """
     Create new board
@@ -105,7 +103,7 @@ def post_create_board(user_id: int):
 
 
 @app.route("/api/users/<int:user_id>/boards/<int:board_id>", methods=['PATCH'])
-@login_required
+@auth.login_required
 def patch_rename_board(user_id: int, board_id: int):
     """
     Rename the board
@@ -118,7 +116,7 @@ def patch_rename_board(user_id: int, board_id: int):
 
 
 @app.route("/api/users/<int:user_id>/boards/<int:board_id>", methods=["DELETE"])
-@login_required
+@auth.login_required
 def delete_board(user_id: int, board_id: int):
     """
     Remove a board
@@ -131,7 +129,7 @@ def delete_board(user_id: int, board_id: int):
 
 
 @app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/")
-@login_required
+@auth.login_required
 def get_cards(user_id: int, board_id: int):
     """
     All cards that belongs to a board
@@ -146,7 +144,7 @@ def get_cards(user_id: int, board_id: int):
 
 
 @app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/archived")
-@login_required
+@auth.login_required
 def get_archived_cards(user_id: int, board_id: int):
     """
     Get all archived card that belongs to a board
@@ -161,7 +159,7 @@ def get_archived_cards(user_id: int, board_id: int):
 
 
 @app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards", methods=['POST'])
-@login_required
+@auth.login_required
 def post_create_card(user_id: int, board_id: int):
     """
     Create new card for board
@@ -174,7 +172,7 @@ def post_create_card(user_id: int, board_id: int):
 
 
 @app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/<int:card_id>", methods=['PATCH'])
-@login_required
+@auth.login_required
 def patch_rename_card(user_id: int, board_id: int, card_id: int):
     """
     Rename a card
@@ -188,7 +186,7 @@ def patch_rename_card(user_id: int, board_id: int, card_id: int):
 
 
 @app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/<int:card_id>/archive", methods=['PATCH'])
-@login_required
+@auth.login_required
 def patch_archive_and_unarchive_card(user_id: int, board_id: int, card_id: int):
     """
     Archive/unarchive a card
@@ -202,7 +200,7 @@ def patch_archive_and_unarchive_card(user_id: int, board_id: int, card_id: int):
 
 
 @app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards", methods=['PATCH'])
-@login_required
+@auth.login_required
 def patch_update_cards(user_id: int, board_id: int):
     """
     Updates all cards that belongs to a board
@@ -214,7 +212,7 @@ def patch_update_cards(user_id: int, board_id: int):
 
 
 @app.route("/api/users/<int:user_id>/boards/<int:board_id>/cards/<int:card_id>", methods=['DELETE'])
-@login_required
+@auth.login_required
 def delete_card(user_id: int, board_id: int, card_id: int):
     """
     Remove card from board
@@ -228,7 +226,7 @@ def delete_card(user_id: int, board_id: int, card_id: int):
 
 
 @app.route('/api/users/<int:user_id>/statuses/<int:board_id>')
-@login_required
+@auth.login_required
 def get_columns(user_id: int, board_id: int):
     """
     Get all statuses(columns) that belongs to a board
@@ -240,7 +238,7 @@ def get_columns(user_id: int, board_id: int):
 
 
 @app.route('/api/users/<int:user_id>/statuses/<int:board_id>', methods=['POST'])
-@login_required
+@auth.login_required
 def post_create_column(user_id: int, board_id: int):
     """
     Create new status(column) and add it into a board
@@ -256,7 +254,7 @@ def post_create_column(user_id: int, board_id: int):
 
 
 @app.route('/api/users/<int:user_id>/statuses/<int:board_id>', methods=['PATCH'])
-@login_required
+@auth.login_required
 def patch_rename_column(user_id: int, board_id: int):
     """
     Rename status(column) that belongs to a board
@@ -273,7 +271,7 @@ def patch_rename_column(user_id: int, board_id: int):
 
 
 @app.route('/api/users/<int:user_id>/statuses/<int:board_id>', methods=['DELETE'])
-@login_required
+@auth.login_required
 def delete_column(user_id: int, board_id: int):
     """
     Delete status(column) from a board
