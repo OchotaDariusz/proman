@@ -212,53 +212,6 @@ export function loadBoardContent(boardId, archived = false) {
     .catch(err => console.log(err));
 }
 
-// const saveNewBoardTitle = (submitEvent, event, board, newTitle, newTitleForm, save = true) => {
-//   submitEvent.preventDefault();
-//   event.target.innerText = newTitle.value;
-//   newTitleForm.outerHTML = event.target.outerHTML;
-//   if(save) {
-//     dataHandler.renameBoard(board.id, newTitle.value, userId)
-//       .then(response => {
-//         flashList.innerHTML = '';
-//         flashList.innerHTML = `<li>${response.message}</li>`;
-//         showPopup(flashes);
-//       })
-//       .catch(err => console.log(err));
-//   }
-//   newTitleForm.reset();
-//   domManager.addEventListener(
-//     `.board-title[data-board-id="${board.id}"]`,
-//     "click",
-//     event => {
-//       renameBoardTitle(event, `.board-title[data-board-id="${board.id}"]`, 'boards', [board]);
-//     }
-//   );
-// };
-
-// function renameBoardTitle(event, board) {
-//   const title = event.target.innerText;
-//   event.target.outerHTML = `<form id="new-title-form" style="display: inline-block;" class="board-title"><input type="text" id="new-title" value="${title}"><button type="submit" style="margin-left: 15px;">save</button></form>`;
-//   const newTitleForm = document.querySelector('#new-title-form');
-//   const newTitle = document.querySelector('#new-title');
-//   newTitle.focus();
-//   newTitleForm.addEventListener('submit', submitEvent => {
-//     if(!!newTitle.innerText && title !== newTitle.innerText) {
-//       console.log(title, newTitle.innerText)
-//       saveNewBoardTitle(submitEvent, event, board, newTitle, newTitleForm);
-//       socket.send('boards');
-//     }
-//     saveNewBoardTitle(submitEvent, event, board, newTitle, newTitleForm, false);
-//   });
-//   newTitleForm.addEventListener('focusout', submitEvent => {
-//     if(!!newTitle.innerText && title !== newTitle.innerText) {
-//       console.log('title', title, 'newTitle', !!newTitle.innerText)
-//       saveNewBoardTitle(submitEvent, event, board, newTitle, newTitleForm);
-//       socket.send('boards');
-//     }
-//     saveNewBoardTitle(submitEvent, event, board, newTitle, newTitleForm, false);
-//   });
-// }
-
 function renameBoardTitle(event, selector, socketMsg, elements) {
   console.log('elements board', elements)
   const title = event.target.innerText;
