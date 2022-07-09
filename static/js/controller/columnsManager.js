@@ -99,29 +99,6 @@ function removeColumnButtonHandler(clickEvent) {
   }
 }
 
-// const saveNewColumnTitle = (submitEvent, event, columnId, boardId, newTitle, newTitleForm, save) => {
-//   submitEvent.preventDefault();
-//   event.target.innerText = newTitle.value;
-//   newTitleForm.outerHTML = event.target.outerHTML;
-//   if(save) {
-//     dataHandler.renameColumn(columnId, boardId, newTitle.value)
-//       .then(response => {
-//         flashList.innerHTML = '';
-//         flashList.innerHTML = `<li>${response.message}</li>`;
-//         showPopup(flashes);
-//       })
-//       .catch(err => console.log(err));
-//   }
-//   newTitleForm.reset();
-//   domManager.addEventListener(
-//     `.board-column-title[data-column-id="${columnId}"][data-board-id="${boardId}"]`,
-//     "click",
-//     event => {
-//       renameColumnTitle(event, columnId, boardId);
-//     }
-//   );
-// };
-
 function renameColumnTitle(event, selector, socketMsg, elements) {
   const title = event.target.innerText;
   event.target.outerHTML = `<form id="new-title-form" style="display: inline-block;" class="board-column-title"><input type="text" id="new-title" maxlength="25" value="${title}"></form>`;

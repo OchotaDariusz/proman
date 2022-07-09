@@ -185,29 +185,6 @@ function buttonHandler(callback, clickEvent, confirmationMessage) {
   }
 }
 
-// const saveNewCardTitle = (submitEvent, event, card, newTitle, newTitleForm, save) => {
-//   submitEvent.preventDefault();
-//   event.target.innerText = newTitle.value;
-//   newTitleForm.outerHTML = event.target.outerHTML;
-//   if(save) {
-//     dataHandler.renameCard(card.board_id, card.id, newTitle.value, userId)
-//       .then(response => {
-//         flashList.innerHTML = '';
-//         flashList.innerHTML = `<li>${response.message}</li>`;
-//         showPopup(flashes);
-//       })
-//       .catch(err => console.log(err));
-//   }
-//   newTitleForm.reset();
-//   domManager.addEventListener(
-//     `.card-title[data-card-board-id="${card.board_id}"][data-card-id="${card.id}"]`,
-//     "click",
-//     event => {
-//       renameCardTitle(event, card);
-//     }
-//   );
-// };
-
 function renameCardTitle(event, selector, socketMsg, elements) {
   const title = event.target.innerText;
   event.target.outerHTML = `<form id="new-card-title-form" style="display: inline-block;" class="card-title"><input type="text" id="new-card-title" value="${title}"><button type="submit">save</button></form>`;

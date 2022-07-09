@@ -47,7 +47,7 @@ def get_boards(user_id: int):
     """
     return data_manager.execute_select(
         """
-        SELECT * FROM boards
+        SELECT id, title, public, user_id, DATE(creation_time) AS creation_time, DATE(last_edit_time) AS last_edit_time FROM boards
         WHERE public = TRUE OR public = FALSE AND user_id = %(user_id)s
         ORDER BY id
         """, variables={'user_id': user_id})
