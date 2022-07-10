@@ -87,17 +87,9 @@ export let cardsManager = {
       .then(response => {
         flashList.innerHTML = '';
         flashList.innerHTML = `<li>${response.message}</li>`;
-        this.reloadBoards(userId);
+        socket.send(boardId);
       })
       .catch(err => console.log(err));
-    socket.send(boardId);
-  },
-  reloadCards: async function(boardId) {
-    const cards = document.querySelectorAll('.card');
-    if(cards) {
-      cards.forEach(card => card.remove());
-      await this.loadCards(boardId);
-    }
   },
 };
 

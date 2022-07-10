@@ -47,9 +47,9 @@ export let columnsManager = {
         flashList.innerHTML = '';
         flashList.innerHTML = `<li>${response.message}</li>`;
         showPopup(flashes);
+        socket.send(boardId);
       })
       .catch(err => console.log(err));
-    boardsManager.reloadBoards(userId);
   },
   reloadColumns: async function(boardId) {
     const boardColumns = document.querySelector(`.board-columns[data-board-id="${boardId}"]`);
@@ -94,9 +94,9 @@ function removeColumnButtonHandler(clickEvent) {
         flashList.innerHTML = '';
         flashList.innerHTML = `<li>${response.message}</li>`;
         showPopup(flashes);
+        socket.send(boardId);
       })
       .catch(err => console.log(err));
-    boardsManager.reloadBoards(userId);
   } else if(userId === 0) {
     showPopup(loginPopup);
   }
