@@ -59,7 +59,7 @@ export const closePopup = element => {
   element.style.display = 'none';
 }
 
-if(loginButton) {
+if (loginButton) {
   loginButton.addEventListener('click', () => {
     showPopup(loginPopup);
   });
@@ -73,11 +73,11 @@ function addBoardButtonLoginAddEvent() {
   });
 }
 
-if(addBoardButtonLogin) {
+if (addBoardButtonLogin) {
   addBoardButtonLoginAddEvent();
 }
 
-if(registerButton) {
+if (registerButton) {
   registerButton.addEventListener('click', () => {
     showPopup(registerPopup);
   });
@@ -139,7 +139,7 @@ registerForm.addEventListener('submit', event => {
   closePopup(registerPopup);
 });
 
-if(createCardForm) {
+if (createCardForm) {
   createCardForm.addEventListener('submit', event => {
     event.preventDefault();
 
@@ -154,7 +154,7 @@ if(createCardForm) {
   });
 }
 
-if(createColumnForm) {
+if (createColumnForm) {
   createColumnForm.addEventListener('submit', async event => {
     event.preventDefault();
 
@@ -177,7 +177,7 @@ function addBoardButtonAddEvent() {
   });
 }
 
-if(addBoardButton) {
+if (addBoardButton) {
   addBoardButtonAddEvent();
 }
 
@@ -189,7 +189,7 @@ addBoardForm.addEventListener('submit', async event => {
   closePopup(addBoardPopup);
 });
 
-if(addPrivateBoardButton) {
+if (addPrivateBoardButton) {
   addPrivateBoardButton.addEventListener('click', () => {
     showPopup(addPrivateBoardPopup);
   });
@@ -220,10 +220,16 @@ async function reRenderDomForLoggedUser() {
 
 async function login(response) {
   userId = response['user_id'];
-  reRenderDomForLoggedUser()
-    .then(async () => {
-      await boardsManager.reloadBoards(userId);
-    })
+  caches.open('workbox-precache-v2').then(function(cache) {
+    cache.delete('/?__WB_REVISION__=1').then(function(response) {
+      console.log('Cache removed')
+      reRenderDomForLoggedUser()
+        .then(async () => {
+          await boardsManager.reloadBoards(userId);
+        })
+        .catch(err => console.log(err));
+    });
+  })
     .catch(err => console.log(err));
 }
 
@@ -245,11 +251,16 @@ async function logout() {
   userId = 0;
 
   const urlTarget = `${window.location.href}logout`;
-
-  sendRequest(urlTarget)
-    .then(() => {
-      showPopup(flashes);
-    })
+  caches.open('workbox-precache-v2').then(function(cache) {
+    cache.delete('/?__WB_REVISION__=1').then(function(response) {
+      console.log('Cache removed')
+      sendRequest(urlTarget)
+        .then(() => {
+          showPopup(flashes);
+        })
+        .catch(err => console.log(err));
+    });
+  })
     .catch(err => console.log(err));
 
   await reRenderDomForLoggedOutUser();
@@ -268,7 +279,7 @@ async function sendRequest(urlTarget, userData = null) {
       return response.json()
     })
     .then(async response => {
-      if(response.hasOwnProperty('user_id')) {
+      if (response.hasOwnProperty('user_id')) {
         await login(response);
         flashList.innerHTML = `<li>${response['message']}</li>`;
       } else {
