@@ -5,54 +5,57 @@ import { socket } from "../main.js";
 import {
   flashes, flashList, loginPopup,
   showPopup, closePopup,
-  createCardPopup, createCardStatus } from "../popup.js";
+  createCardPopup, createCardStatus
+} from "../popup.js";
 import { boardsManager } from "./boardsManager.js";
 
 export let cardsManager = {
   loadCards: async function(boardId, archived = false) {
-    getCards(userId, boardId, archived)
-      .then(cards => {
-        if(cards) {
-          console.log('cards', cards);
-          for(let card of cards) {
-            const cardBuilder = htmlFactory(htmlTemplates.card);
-            const content = cardBuilder(card);
-            domManager.addChild(
-              `.board-column-content[data-column-id="${card.status_id}"][data-board-id="${boardId}"]`,
-              content
+    try {
+      const cards = await getCards(userId, boardId, archived);
+      if (cards) {
+        console.log('cards', cards);
+        for (let card of cards) {
+          const cardBuilder = htmlFactory(htmlTemplates.card);
+          const content = cardBuilder(card);
+          domManager.addChild(
+            `.board-column-content[data-column-id="${card.status_id}"][data-board-id="${boardId}"]`,
+            content
+          );
+          if (card['user_id'] === userId) {
+            domManager.addEventListener(
+              `.card-remove[data-card-id="${card.id}"]`,
+              "click",
+              deleteButtonHandler
             );
-            if(card['user_id'] === userId) {
-              domManager.addEventListener(
-                `.card-remove[data-card-id="${card.id}"]`,
-                "click",
-                deleteButtonHandler
-              );
-              domManager.addEventListener(
-                `.card-archive[data-card-id="${card.id}"]`,
-                "click",
-                archiveButtonHandler
-              );
-              domManager.addEventListener(
-                `.card-title[data-card-board-id="${card.board_id}"][data-card-id="${card.id}"]`,
-                "click",
-                event => {
-                  renameCardTitle(
-                    event,
-                    `.card-title[data-card-board-id="${card.board_id}"][data-card-id="${card.id}"]`,
-                    card.board_id,
-                    [card]);
-                }
-              );
-            }
+            domManager.addEventListener(
+              `.card-archive[data-card-id="${card.id}"]`,
+              "click",
+              archiveButtonHandler
+            );
+            domManager.addEventListener(
+              `.card-title[data-card-board-id="${card.board_id}"][data-card-id="${card.id}"]`,
+              "click",
+              event => {
+                renameCardTitle(
+                  event,
+                  `.card-title[data-card-board-id="${card.board_id}"][data-card-id="${card.id}"]`,
+                  card.board_id,
+                  [card]);
+              }
+            );
           }
         }
-      })
-      .catch(err => console.log(err));
+      }
+    } catch (err) {
+      console.log(err);
+      await boardsManager.reloadBoards(userId);
+    }
   },
   initDragAndDrop: function(boardId) {
     let current = null;
-    let cards = document.querySelectorAll(`.card[data-card-board-id="${boardId}"]`);
-    for(let card of cards) {
+    let cards = document.querySelectorAll(`div.card[data-card-board-id="${boardId}"]`);
+    for (let card of cards) {
       card.ondragstart = () => {
         current = card;
         card.classList.add("dragged");
@@ -69,8 +72,9 @@ export let cardsManager = {
       }
     }
     let columns = document.querySelectorAll(`.board-column-content[data-board-id="${boardId}"]`);
-    for(let column of columns) {
-      if(column.childNodes.length === 0) {
+    console.log(columns)
+    for (let column of columns) {
+      if (column.childNodes.length === 0) {
         column.ondragover = (e) => {
           e.preventDefault();
         };
@@ -97,7 +101,7 @@ export let cardsManager = {
 };
 
 async function getCards(userId, boardId, archived) {
-  if(archived === true) {
+  if (archived === true) {
     return await setup_cards(dataHandler.getArchivedCardsByBoardId, userId, boardId, 'Archived cards', 'archived_cards');
   } else {
     return await setup_cards(dataHandler.getCardsByBoardId, userId, boardId, 'Cards', 'cards');
@@ -119,14 +123,14 @@ export function showCreateCardForm(boardId) {
 async function setup_cards(callback, userId, boardId, cards_header, localStorageKey) {
   let cards = await callback(userId, boardId);
   const cardsHeader = document.querySelector(`.board-card-header[data-board-id="${boardId}"]`)
-  if(cardsHeader) {
+  if (cardsHeader) {
     cardsHeader.innerText = cards_header;
   }
-  if(cards && cards.hasOwnProperty('message')) {
+  if (cards && cards.hasOwnProperty('message')) {
     flashList.innerHTML = '';
     flashList.innerHTML = `<li>${cards.message}</li>`;
     showPopup(flashes);
-  } else if(cards) {
+  } else if (cards) {
     // if(cards && localStorage.getItem(localStorageKey) === null) {
     //   localStorage.setItem(localStorageKey, JSON.stringify(cards));
     // } else if(!cards && localStorage.getItem(localStorageKey) !== null) {
@@ -134,9 +138,9 @@ async function setup_cards(callback, userId, boardId, cards_header, localStorage
     // }
     return cards;
   }
-  if(cards.hasOwnProperty('message')) {
-    if(userId === 0) {
-      if(!cards.message.startsWith('Cards')) {
+  if (cards.hasOwnProperty('message')) {
+    if (userId === 0) {
+      if (!cards.message.startsWith('Cards')) {
         boardsManager.closeBoards()
           .then(() => showPopup(loginPopup))
           .then()
@@ -165,7 +169,7 @@ function deleteButtonHandler(clickEvent) {
 function buttonHandler(callback, clickEvent, confirmationMessage) {
   const boardId = clickEvent.target.dataset.cardBoardId;
   const cardId = clickEvent.target.dataset.cardId;
-  if(confirm(confirmationMessage)) {
+  if (confirm(confirmationMessage)) {
     callback(boardId, cardId, userId)
       .then(response => {
         console.log('kurwa', response)
@@ -213,8 +217,8 @@ function renameCardTitle(event, selector, socketMsg, elements) {
 }
 
 function handleDropOnCardEvent(draggedCard, dropZoneCard, cards, boardId) {
-  if(dropZoneCard !== draggedCard) {
-    if(draggedCard.dataset.statusId === dropZoneCard.dataset.statusId &&
+  if (dropZoneCard !== draggedCard) {
+    if (draggedCard.dataset.statusId === dropZoneCard.dataset.statusId &&
       draggedCard.dataset.order < dropZoneCard.dataset.order) {
       dropZoneCard.parentElement.insertBefore(draggedCard, dropZoneCard.nextSibling);
     } else {
@@ -233,7 +237,7 @@ async function updateCardsData(dragged, dropStatusId, dropOrder, cards, boardId)
   dragged.dataset.statusId = dropStatusId;
   newCardData = [{ 'id': dragged.dataset.cardId, 'status_id': dropStatusId, 'card_order': dropOrder }]
   cards.forEach(c => {
-    if((dragStatusId === dropStatusId && dragOrder < dropOrder && c.dataset.order <= dropOrder ||
+    if ((dragStatusId === dropStatusId && dragOrder < dropOrder && c.dataset.order <= dropOrder ||
         dragStatusId !== dropStatusId) && c.dataset.statusId === dragStatusId &&
       c.dataset.order > dragOrder && c !== dragged) {
       c.dataset.order = String(Number(c.dataset.order) - 1);
@@ -242,7 +246,7 @@ async function updateCardsData(dragged, dropStatusId, dropOrder, cards, boardId)
         'status_id': c.dataset.statusId,
         'card_order': c.dataset.order
       })
-    } else if((dragStatusId === dropStatusId && c.dataset.statusId === dragStatusId && c.dataset.order < dragOrder ||
+    } else if ((dragStatusId === dropStatusId && c.dataset.statusId === dragStatusId && c.dataset.order < dragOrder ||
         dragStatusId !== dropStatusId && c.dataset.statusId === dropStatusId) &&
       c.dataset.order >= dropOrder && c !== dragged) {
       c.dataset.order = String(Number(c.dataset.order) + 1);

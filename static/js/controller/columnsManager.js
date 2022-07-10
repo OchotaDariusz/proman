@@ -15,7 +15,7 @@ export let columnsManager = {
     const columns = await dataHandler.getStatuses(userId, boardId);
     if (columns) {
       console.log('columns', columns);
-      for(let column in columns) {
+      for (let column in columns) {
         column = columns[column];
         const columnBuilder = htmlFactory(htmlTemplates.column);
         const content = columnBuilder(column, boardId);
@@ -52,15 +52,16 @@ export let columnsManager = {
   },
   reloadColumns: async function(boardId) {
     const boardColumns = document.querySelector(`.board-columns[data-board-id="${boardId}"]`);
-    if(boardColumns && domManager.hasChild(`.board-columns[data-board-id="${boardId}"]`)) {
+    if (boardColumns && domManager.hasChild(`.board-columns[data-board-id="${boardId}"]`)) {
       domManager.removeAllChildren(`.board-columns[data-board-id="${boardId}"]`);
       const cardsHeader = document.querySelector(`.board-card-header[data-board-id="${boardId}"]`);
-      if(cardsHeader) {
+      if (cardsHeader) {
         cardsHeader.remove();
       }
       this.loadColumns(boardId)
         .then(() => cardsManager.loadCards(boardId))
         .then(() => {
+          cardsManager.initDragAndDrop(boardId);
           setTimeout(async () => {
             await this.verifyLoadedColumns(boardId);
           }, 3000);
@@ -72,10 +73,10 @@ export let columnsManager = {
     const columns = await dataHandler.getStatuses(userId, boardId);
     const loadedColumns = document.querySelectorAll(`.board-column[data-board-id="${boardId}"]`);
 
-    if(columns.length !== loadedColumns.length) {
+    if (columns.length !== loadedColumns.length) {
       try {
         await this.reloadColumns(boardId);
-      } catch(err) {
+      } catch (err) {
         console.log(err);
       }
     }
@@ -83,7 +84,7 @@ export let columnsManager = {
 }
 
 function removeColumnButtonHandler(clickEvent) {
-  if(userId !== 0 && confirm('Are you sure want to delete that column?')) {
+  if (userId !== 0 && confirm('Are you sure want to delete that column?')) {
     const boardId = clickEvent.target.dataset.boardId;
     const columnId = clickEvent.target.dataset.columnId;
     dataHandler.removeColumn(userId, boardId, columnId)
@@ -94,7 +95,7 @@ function removeColumnButtonHandler(clickEvent) {
         socket.send(boardId);
       })
       .catch(err => console.log(err));
-  } else if(userId === 0) {
+  } else if (userId === 0) {
     showPopup(loginPopup);
   }
 }
