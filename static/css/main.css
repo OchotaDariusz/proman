@@ -17,8 +17,79 @@
 
 body {
     min-width: 620px;
+    display: flex;
+    flex-direction: column;
     background: #ddd url(../img/diagonal-noise.png);
     font-family: sans-serif;
+}
+
+@media screen and (max-width: 700px) {
+    body {
+        min-width: 280px;
+    }
+
+    .board-add-column {
+        display: none;
+    }
+
+    .board-columns {
+        flex-direction: column !important;
+    }
+}
+
+@media screen and (max-width: 590px) {
+    .board-add-column,
+    .board-toggle-archived {
+        display: none !important;
+    }
+
+    .board-columns {
+        flex-direction: column !important;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .board-add-column,
+    .board-toggle-archived,
+    .board-add {
+        display: none !important;
+    }
+
+    .board-columns {
+        flex-direction: column !important;
+    }
+}
+
+@media screen and (max-width: 400px) {
+    .board-add-column,
+    .board-toggle-archived,
+    .board-add {
+        display: none !important;
+    }
+
+    .board-columns {
+        flex-direction: column !important;
+    }
+
+    .board-header {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 100px;
+    }
+
+    .board-remove {
+        margin: 0 13px 13px 13px !important;
+    }
+}
+
+#manual-sync {
+    display: inline-block;
+}
+
+@media screen and (max-width: 320px) {
+    #manual-sync {
+        display: none;
+    }
 }
 
 h1, .board-title, .board-column-title {
@@ -41,9 +112,11 @@ button {
     padding: 4px 10px;
 }
 
-.board-container {
-    max-width: 960px;
-    margin: 0 auto;
+@media screen and (min-width: 1280px) {
+    .board-container {
+        max-width: 960px;
+        margin: 0 auto;
+    }
 }
 
 section.board {
@@ -72,6 +145,7 @@ section.board {
 .board-remove {
     float: right;
     margin-top: 13px;
+    margin-left: 13px
     cursor: pointer;
 }
 
@@ -83,6 +157,7 @@ section.board {
 .board-columns {
     display: flex;
     flex-wrap: nowrap;
+    flex-direction: row;
 }
 
 .board-card-header {
@@ -186,11 +261,12 @@ section.board {
 .navbar {
     display: flex;
     justify-content: center;
+    margin-bottom: 10px;
 }
 
 .popup {
-    background: var(--shadow);
     height: 100vh;
+    width: 100vw;
     align-items: center;
     justify-content: center;
     display: none;
@@ -198,7 +274,6 @@ section.board {
     z-index: 1000;
     left: 0;
     top: 0;
-    width: 100vw;
 }
 
 .popup-header {
@@ -208,10 +283,11 @@ section.board {
 
 .form {
     display: grid;
-    grid-template-columns: repeat(6, 66px);
+    grid-template-columns: repeat(6, minmax(auto, 66px));
     padding: 20px;
+    margin: 10em;
     background-color: white;
-    box-shadow: 0 0 15px 0 var(--shadow);
+    box-shadow: 0 0 15px 0 var(--shadow), 0 0 0 100vmax var(--shadow);
 }
 
 .form label {
@@ -290,6 +366,7 @@ section.board {
     list-style-type: none;
     padding: 20px;
     text-align: center;
+    box-shadow: 0 0 15px 0 var(--shadow), 0 0 0 100vmax var(--shadow);
 }
 
 /* Tooltip container */

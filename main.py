@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 from os import environ
 
 from flask import Flask, render_template, url_for, session, request, jsonify, make_response, send_from_directory
@@ -8,6 +9,7 @@ import mimetypes
 import auth
 import queries
 
+load_dotenv()
 mimetypes.add_type('application/javascript', '.js')
 mimetypes.add_type('text/html', '.html')
 mimetypes.add_type('application/json', '.json')
@@ -310,7 +312,7 @@ def main():
     """
     Run app
     """
-    socketio.run(app, debug=True)
+    socketio.run(app, debug=True, host='0.0.0.0', port=5000)
 
     # Serving the favicon
     with app.app_context():
