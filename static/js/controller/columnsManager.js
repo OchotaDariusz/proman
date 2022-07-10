@@ -67,8 +67,6 @@ export let columnsManager = {
           }, 3000);
         })
         .catch(err => console.log(err));
-    } else {
-      boardsManager.reloadBoards(userId);
     }
   },
   verifyLoadedColumns: async function(boardId) {
