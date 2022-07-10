@@ -69,7 +69,7 @@ section.board {
     display: inline-block;
 }
 
-.fas.fa-trash-alt.board {
+.board-remove {
     float: right;
     margin-top: 13px;
     cursor: pointer;

@@ -10,6 +10,7 @@ export let cardsManager = {
     getCards(userId, boardId, archived)
       .then(cards => {
         if(cards) {
+          console.log('cards', cards);
           for(let card of cards) {
             const cardBuilder = htmlFactory(htmlTemplates.card);
             const content = cardBuilder(card);
@@ -186,26 +187,36 @@ function buttonHandler(callback, clickEvent, confirmationMessage) {
 }
 
 function renameCardTitle(event, selector, socketMsg, elements) {
+  const addSaveTitleEvent = eventType => {
+    const handleNewTitle = (submitEvent, save) => {
+      domManager.saveNewTitle(
+        submitEvent, event,
+        newTitle, newTitleForm,
+        dataHandler.renameCard, renameCardTitle,
+        socketMsg, save,
+        selector, elements
+      );
+    };
+    newTitleForm.addEventListener(eventType, submitEvent => {
+      if (title !== newTitle.value) {
+        handleNewTitle(submitEvent, true);
+        socket.send(socketMsg);
+      }
+      handleNewTitle(submitEvent, false);
+    });
+  };
+
   const title = event.target.innerText;
-  event.target.outerHTML = `<form id="new-card-title-form" style="display: inline-block;" class="card-title"><input type="text" id="new-card-title" value="${title}"><button type="submit">save</button></form>`;
+  event.target.outerHTML = `<form id="new-card-title-form" style="display: inline-block;" class="card-title">
+                              <input type="text" id="new-card-title" value="${title}">
+                              <button type="submit">save</button>
+                            </form>`;
   const newTitleForm = document.querySelector('#new-card-title-form');
   const newTitle = document.querySelector('#new-card-title');
   newTitle.focus();
-  newTitleForm.addEventListener('submit', submitEvent => {
-    if(title !== newTitle.value) {
-      console.log(title, newTitle.value)
-      domManager.saveNewTitle(submitEvent, event, newTitle, newTitleForm, dataHandler.renameCard, renameCardTitle, socketMsg, true, selector, elements);
-      socket.send(socketMsg);
-    }
-    domManager.saveNewTitle(submitEvent, event, newTitle, newTitleForm, dataHandler.renameCard, renameCardTitle, socketMsg, false, selector, elements);
-  });
-  newTitleForm.addEventListener('focusout', submitEvent => {
-    if(title !== newTitle.value) {
-      domManager.saveNewTitle(submitEvent, event, newTitle, newTitleForm, dataHandler.renameCard, renameCardTitle, socketMsg, true, selector, elements);
-      socket.send(socketMsg);
-    }
-    domManager.saveNewTitle(submitEvent, event, newTitle, newTitleForm, dataHandler.renameCard, renameCardTitle, socketMsg, false, selector, elements);
-  });
+
+  addSaveTitleEvent('submit');
+  addSaveTitleEvent('focusout');
 }
 
 function handleDropOnCardEvent(draggedCard, dropZoneCard, cards, boardId) {

@@ -11,7 +11,7 @@ export const builderFunctions = {
 };
 
 export function htmlFactory(template) {
-  if(builderFunctions.hasOwnProperty(template)) {
+  if (builderFunctions.hasOwnProperty(template)) {
     return builderFunctions[template];
   }
 
@@ -29,10 +29,14 @@ function boardBuilder(board) {
                             <button class="board-add" data-board-id="${board.id}">Add Card</button>
                             <button class="board-add-column" data-board-id="${board.id}">Add Column</button>
                             <button class="board-toggle-archived" data-board-id="${board.id}">Show archived</button>
-                            <button class="board-toggle" data-board-id="${board.id}">
-                              <i class="fas fa-chevron-down" data-board-id="${board.id}"></i>
+                            <button class="board-toggle" aria-label="Open board" data-board-id="${board.id}">
+                              <i class="fas fa-chevron-down" aria-hidden="true" data-board-id="${board.id}"></i>
                             </button>`;
-  boardComponent += (board['user_id'] === userId) ? `<button class="fas fa-trash-alt board" data-board-id="${board.id}"></button>` : ``;
+  boardComponent += (board['user_id'] === userId) ? `<button class="board-remove" aria-label="Remove board"
+                                                             data-board-id="${board.id}">
+                                                       <i class="fas fa-trash-alt" aria-hidden="true" 
+                                                          data-board-id="${board.id}"></i>
+                                                     </button>` : ``;
   boardComponent += `     </div>
                           <div class="board-columns" data-board-id="${board.id}"></div> 
                         </section>`;
@@ -45,23 +49,26 @@ function cardBuilder(card) {
                                          data-status-id="${card.status_id}" 
                                          data-order="${card.card_order}"`;
   cardComponent += (card['user_id'] === userId) ? ` draggable="true">
-                        <div class="card-archive" data-card-id="${card.id}" 
-                                                  data-card-board-id="${card.board_id}">
+                        <div class="card-archive" data-card-id="${card.id}" data-card-board-id="${card.board_id}"
+                                                  aria-label="Archive/Unarchive card">
                           <div class="tooltip" data-card-id="${card.id}" 
                                                data-card-board-id="${card.board_id}">
                             <span class="tooltiptext" data-card-id="${card.id}" 
                                                       data-card-board-id="${card.board_id}">Archive/Unarchive</span>
                             <i class="fa-solid fa-box-archive" data-card-id="${card.id}" 
-                                                               data-card-board-id="${card.board_id}"></i>
+                                                               data-card-board-id="${card.board_id}"
+                                                               aria-hidden="true"></i>
                           </div>
                         </div>
-                        <div class="card-remove" data-card-id="${card.id}" data-card-board-id="${card.board_id}">
+                        <div class="card-remove" data-card-id="${card.id}" data-card-board-id="${card.board_id}"
+                                                 aria-label="Remove card">
                           <div class="tooltip" data-card-id="${card.id}" 
                                                data-card-board-id="${card.board_id}">
                             <span class="tooltiptext" data-card-id="${card.id}" 
                                                       data-card-board-id="${card.board_id}">Remove</span>
                             <i class="fas fa-trash-alt" data-card-id="${card.id}" 
-                                                        data-card-board-id="${card.board_id}"></i>
+                                                        data-card-board-id="${card.board_id}"
+                                                        aria-hidden="true"></i>
                           </div>
                         </div>` : `>`;
   cardComponent += `<div class="card-title" data-card-board-id="${card.board_id}" 
@@ -71,11 +78,14 @@ function cardBuilder(card) {
 
 function columnBuilder(column, boardId) {
   return `<div class="board-column" data-column-id="${column.id}" data-board-id="${boardId}">
-            <div class="board-column-title" data-column-id="${column.id}" data-board-id="${boardId}">${column.title}</div>
-            <div class="board-column-remove" data-column-id="${column.id}" data-board-id="${boardId}">
+            <div class="board-column-title" data-column-id="${column.id}" 
+                                            data-board-id="${boardId}">${column.title}</div>
+            <div class="board-column-remove" data-column-id="${column.id}" data-board-id="${boardId}"
+                                             aria-label="Remove column">
               <div class="tooltip">
                 <span class="tooltiptext" data-column-id="${column.id}" data-board-id="${boardId}">Remove</span>
-                <i class="fa-solid fa-circle-xmark" data-column-id="${column.id}" data-board-id="${boardId}"></i>
+                <i class="fa-solid fa-circle-xmark" data-column-id="${column.id}" data-board-id="${boardId}"
+                                                    aria-hidden="true"></i>
               </div>
             </div>
             <div class="board-column-content" data-column-id="${column.id}" data-board-id="${boardId}"></div>
