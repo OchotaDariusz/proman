@@ -19,10 +19,12 @@ export const createCardPopup = document.querySelector('#create-card');
 const createCardForm = document.querySelector('#create-card-form');
 const createCardTitle = document.querySelector('#card-title');
 export const createCardStatus = document.querySelector('#card-status');
+export const createCardHiddenInput = document.querySelector('#create-card-hidden-input');
 
 export const createColumnPopup = document.querySelector('#create-column')
 const createColumnForm = document.querySelector('#create-column-form')
 const createColumnTitle = document.querySelector('#column-title')
+export const createColumnHiddenInput = document.querySelector('#create-column-hidden-input');
 
 const addBoardPopup = document.querySelector('#add-board-popup');
 let addBoardButton = document.querySelector('#add-board-button');
@@ -143,8 +145,8 @@ if(createCardForm) {
 
     const cardTitle = createCardTitle.value;
     const cardStatus = createCardStatus.value;
-    const boardId = localStorage.getItem('boardId');
-    localStorage.removeItem('boardId');
+    const boardId = createCardHiddenInput.value;
+    createCardHiddenInput.setAttribute('value', '0');
 
     cardsManager.createCard(cardTitle, boardId, cardStatus, userId)
       .then(() => createCardForm.reset())
@@ -157,8 +159,8 @@ if(createColumnForm) {
     event.preventDefault();
 
     const columnTitle = createColumnTitle.value;
-    const boardId = localStorage.getItem('boardId');
-    localStorage.removeItem('boardId');
+    const boardId = createColumnHiddenInput.value;
+    createColumnHiddenInput.setAttribute('value', '0');
 
     await columnsManager.createColumn(columnTitle, boardId);
 
@@ -220,9 +222,7 @@ async function login(response) {
   userId = response['user_id'];
   reRenderDomForLoggedUser()
     .then(async () => {
-      if(localStorage.getItem('boardId') !== null) {
-        await boardsManager.closeBoards(localStorage.getItem('boardId'))
-      }
+      await boardsManager.reloadBoards(userId);
     })
     .catch(err => console.log(err));
 }

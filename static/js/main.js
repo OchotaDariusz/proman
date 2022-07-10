@@ -76,6 +76,3 @@ async function init() {
 init()
   .then(() => console.log('Initialized'))
   .catch(err => console.log(err));
-
-console.log(caches)
-console.log(indexedDB)

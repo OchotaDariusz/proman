@@ -5,9 +5,9 @@ import { cardsManager, showCreateCardForm } from "./cardsManager.js";
 import {
   showPopup,
   loginPopup,
-  createCardPopup,
-  createCardStatus,
+  createCardHiddenInput,
   createColumnPopup,
+  createColumnHiddenInput,
   flashList,
   flashes
 } from "../popup.js";
@@ -81,12 +81,6 @@ export let boardsManager = {
       .catch(err => console.log(err));
     socket.send('boards');
   },
-  closeBoard: async function(boardId) {
-    const board = document.querySelector(`.board[data-board-id="${boardId}"]`);
-    if (board) {
-      board.remove();
-    }
-  },
   closeBoards: async function(boardId = null) {
     const boards = document.querySelectorAll('section.board');
     boards.forEach(board => {
@@ -137,7 +131,7 @@ export let boardsManager = {
 };
 
 function addCardButtonHandler(board) {
-  localStorage.setItem('boardId', board.id);
+  createCardHiddenInput.setAttribute('value', board.id);
   if (userId === 0) {
     showPopup(loginPopup);
   } else {
@@ -146,7 +140,7 @@ function addCardButtonHandler(board) {
 }
 
 function addColumnButtonHandler(board) {
-  localStorage.setItem('boardId', board.id);
+  createColumnHiddenInput.setAttribute('value', board.id);
   if (userId === 0) {
     showPopup(loginPopup);
   } else {

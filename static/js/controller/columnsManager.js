@@ -1,8 +1,7 @@
 import { dataHandler } from "../data/dataHandler.js";
 import { htmlFactory, htmlTemplates } from "../view/htmlFactory.js";
 import { domManager } from "../view/domManager.js";
-import { boardsManager } from "./boardsManager.js";
-import { showPopup, loginPopup, flashes, flashList, createColumnPopup } from "../popup.js";
+import { showPopup, loginPopup, flashes, flashList } from "../popup.js";
 import { socket } from "../main.js";
 import { cardsManager } from "./cardsManager.js";
 

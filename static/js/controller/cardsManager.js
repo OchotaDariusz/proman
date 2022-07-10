@@ -2,8 +2,11 @@ import { dataHandler } from "../data/dataHandler.js";
 import { htmlFactory, htmlTemplates } from "../view/htmlFactory.js";
 import { domManager } from "../view/domManager.js";
 import { socket } from "../main.js";
-import { flashes, flashList, loginPopup, showPopup, closePopup, createCardPopup, createCardStatus } from "../popup.js";
-import { boardsManager, loadBoardContent } from "./boardsManager.js";
+import {
+  flashes, flashList, loginPopup,
+  showPopup, closePopup,
+  createCardPopup, createCardStatus } from "../popup.js";
+import { boardsManager } from "./boardsManager.js";
 
 export let cardsManager = {
   loadCards: async function(boardId, archived = false) {
@@ -110,7 +113,6 @@ export function showCreateCardForm(boardId) {
       });
     })
     .catch(err => console.log(err));
-  localStorage.setItem('boardId', boardId)
   showPopup(createCardPopup)
 }
 
@@ -125,17 +127,16 @@ async function setup_cards(callback, userId, boardId, cards_header, localStorage
     flashList.innerHTML = `<li>${cards.message}</li>`;
     showPopup(flashes);
   } else if(cards) {
-    if(cards && localStorage.getItem(localStorageKey) === null) {
-      localStorage.setItem(localStorageKey, JSON.stringify(cards));
-    } else if(!cards && localStorage.getItem(localStorageKey) !== null) {
-      return Array.from(JSON.parse(localStorage.getItem(localStorageKey)));
-    }
+    // if(cards && localStorage.getItem(localStorageKey) === null) {
+    //   localStorage.setItem(localStorageKey, JSON.stringify(cards));
+    // } else if(!cards && localStorage.getItem(localStorageKey) !== null) {
+    //   return Array.from(JSON.parse(localStorage.getItem(localStorageKey)));
+    // }
     return cards;
   }
   if(cards.hasOwnProperty('message')) {
     if(userId === 0) {
       if(!cards.message.startsWith('Cards')) {
-        localStorage.setItem('boardId', boardId);
         boardsManager.closeBoards()
           .then(() => showPopup(loginPopup))
           .then()
