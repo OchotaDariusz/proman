@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 from os import environ
 
-from flask import Flask, render_template, url_for, session, request, jsonify
+from flask import Flask, render_template, url_for, session, request, jsonify, make_response, send_from_directory
 from flask_socketio import SocketIO
 from flask_cors import CORS
 import mimetypes
@@ -293,7 +293,19 @@ def handle_sync(content: any):
     """
     if content:
         print('Syncing...')
-    socketio.send(content)
+        socketio.send(content)
+
+
+@app.route('/manifest.json')
+def manifest():
+    return send_from_directory('static', 'manifest.json')
+
+
+@app.route('/sw.js')
+def service_worker():
+    response = make_response(send_from_directory('static', 'sw.js'))
+    response.headers['Cache-Control'] = 'no-cache'
+    return response
 
 
 def main():

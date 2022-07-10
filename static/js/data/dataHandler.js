@@ -59,75 +59,59 @@ export let dataHandler = {
   },
 };
 
-async function apiGet(url) {
-  let response = await fetch(url, {
-    method: "GET",
-  });
-  console.log(response)
-  if(response.ok) {
-    return await response.json();
-  } else {
-    const data = await response.json();
-    if(data.hasOwnProperty('message')) {
-      return data;
+const fetchUrl = async (url, method, payload) => {
+  try {
+    if (method === 'GET') {
+      return await fetch(url);
+    } else {
+      return await fetch(url, {
+        method: method,
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload),
+      });
     }
-    return null;
+  } catch (err) {
+    console.log('Error when fetching data');
+    console.log(err.message);
+  } finally {
+    console.log('request method:', method); // TODO: remove
   }
+};
+
+const apiSend = async (url, method = 'GET', payload = { "message": "empty" }) => {
+  let response = await fetchUrl(url, method, payload);
+  try {
+    if (response.ok) {
+      return await response.json();
+    } else {
+      const data = await response.json();
+      if (data.hasOwnProperty('message')) {
+        return data;
+      }
+      return null;
+    }
+  } catch (err) {
+    console.log('Error when parsing data');
+    console.log(err.message);
+  } finally {
+    console.log('response:', response); // TODO: remove
+  }
+};
+
+async function apiGet(url) {
+  return await apiSend(url);
 }
 
 async function apiPost(url, payload) {
-  let response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload),
-  });
-  if(response.ok) {
-    return await response.json();
-  } else {
-    const data = await response.json();
-    if(data.hasOwnProperty('message')) {
-      return data;
-    }
-    return null;
-  }
+  return await apiSend(url, 'POST', payload);
 }
 
 async function apiDelete(url, payload = { "message": "empty" }) {
-  let response = await fetch(url, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload),
-  });
-  if(response.ok) {
-    return await response.json();
-  } else {
-    const data = await response.json();
-    if(data.hasOwnProperty('message')) {
-      return data;
-    }
-    return null;
-  }
+  return await apiSend(url, 'DELETE', payload);
 }
 
 async function apiPatch(url, payload = { "message": "empty" }) {
-  let response = await fetch(url, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload),
-  });
-  if(response.ok) {
-    return await response.json();
-  } else {
-    const data = await response.json();
-    if(data.hasOwnProperty('message')) {
-      return data;
-    }
-    return null;
-  }
+  return await apiSend(url, 'PATCH', payload);
 }

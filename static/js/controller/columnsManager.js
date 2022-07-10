@@ -14,28 +14,31 @@ export let columnsManager = {
       'afterend'
     );
     const columns = await dataHandler.getStatuses(userId, boardId);
-    for(let column in columns) {
-      column = columns[column];
-      const columnBuilder = htmlFactory(htmlTemplates.column);
-      const content = columnBuilder(column, boardId);
-      domManager.addChild(`.board-columns[data-board-id="${boardId}"]`, content);
-      domManager.addEventListener(
-        `.board-column-remove[data-column-id="${column.id}"][data-board-id="${boardId}"]`,
-        "click",
-        removeColumnButtonHandler
-      );
-      domManager.addEventListener(
-        `.board-column-title[data-column-id="${column.id}"][data-board-id="${boardId}"]`,
-        "click",
-        event => {
-          renameColumnTitle(
-            event,
-            `.board-column-title[data-column-id="${column.id}"][data-board-id="${boardId}"]`,
-            boardId,
-            [column.id, boardId]
-          )
-        }
-      );
+    if (columns) {
+      console.log('columns', columns);
+      for(let column in columns) {
+        column = columns[column];
+        const columnBuilder = htmlFactory(htmlTemplates.column);
+        const content = columnBuilder(column, boardId);
+        domManager.addChild(`.board-columns[data-board-id="${boardId}"]`, content);
+        domManager.addEventListener(
+          `.board-column-remove[data-column-id="${column.id}"][data-board-id="${boardId}"]`,
+          "click",
+          removeColumnButtonHandler
+        );
+        domManager.addEventListener(
+          `.board-column-title[data-column-id="${column.id}"][data-board-id="${boardId}"]`,
+          "click",
+          event => {
+            renameColumnTitle(
+              event,
+              `.board-column-title[data-column-id="${column.id}"][data-board-id="${boardId}"]`,
+              boardId,
+              [column.id, boardId]
+            )
+          }
+        );
+      }
     }
   },
   createColumn: function(columnTitle, boardId) {
@@ -100,24 +103,33 @@ function removeColumnButtonHandler(clickEvent) {
 }
 
 function renameColumnTitle(event, selector, socketMsg, elements) {
+  const addSaveTitleEvent = eventType => {
+    const handleNewTitle = (submitEvent, save) => {
+      domManager.saveNewTitle(
+        submitEvent, event,
+        newTitle, newTitleForm,
+        dataHandler.renameColumn, renameColumnTitle,
+        socketMsg, save,
+        selector, elements
+      );
+    };
+    newTitleForm.addEventListener(eventType, submitEvent => {
+      if (title !== newTitle.value) {
+        handleNewTitle(submitEvent, true);
+        socket.send(socketMsg);
+      }
+      handleNewTitle(submitEvent, false);
+    });
+  };
+
   const title = event.target.innerText;
-  event.target.outerHTML = `<form id="new-title-form" style="display: inline-block;" class="board-column-title"><input type="text" id="new-title" maxlength="25" value="${title}"></form>`;
+  event.target.outerHTML = `<form id="new-title-form" style="display: inline-block;" class="board-column-title">
+                              <input type="text" id="new-title" maxlength="25" value="${title}">
+                            </form>`;
   const newTitleForm = document.querySelector('#new-title-form');
   const newTitle = document.querySelector('#new-title');
   newTitle.focus();
-  newTitleForm.addEventListener('submit', submitEvent => {
-    if(title !== newTitle.value) {
-      console.log(title, newTitle.value)
-      domManager.saveNewTitle(submitEvent, event, newTitle, newTitleForm, dataHandler.renameColumn, renameColumnTitle, socketMsg, true, selector, elements);
-      socket.send(socketMsg);
-    }
-    domManager.saveNewTitle(submitEvent, event, newTitle, newTitleForm, dataHandler.renameColumn, renameColumnTitle, socketMsg, false, selector, elements);
-  });
-  newTitleForm.addEventListener('focusout', submitEvent => {
-    if(title !== newTitle.value) {
-      domManager.saveNewTitle(submitEvent, event, newTitle, newTitleForm, dataHandler.renameColumn, renameColumnTitle, socketMsg, true, selector, elements);
-      socket.send(socketMsg);
-    }
-    domManager.saveNewTitle(submitEvent, event, newTitle, newTitleForm, dataHandler.renameColumn, renameColumnTitle, socketMsg, false, selector, elements);
-  });
+
+  addSaveTitleEvent('submit');
+  addSaveTitleEvent('focusout');
 }

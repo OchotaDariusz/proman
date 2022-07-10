@@ -3,7 +3,7 @@ import { flashes, flashList, showPopup } from "../popup.js";
 export let domManager = {
   addChild(parentIdentifier, childContent, where = 'beforeend') {
     const parent = document.querySelector(parentIdentifier);
-    if(parent) {
+    if (parent) {
       parent.insertAdjacentHTML(where, childContent);
     } else {
       console.error("could not find such html element: " + parentIdentifier);
@@ -11,7 +11,7 @@ export let domManager = {
   },
   addEventListener(elementIdentifier, eventType, eventHandler, once = false) {
     const parent = document.querySelector(elementIdentifier);
-    if(parent) {
+    if (parent) {
       parent.addEventListener(eventType, eventHandler, { once: once });
     } else {
       console.error("could not find such html element: " + elementIdentifier);
@@ -30,7 +30,6 @@ export let domManager = {
     cls.map(cl => element.classList.toggle(cl));
   },
   reloadRenameEventListener(selector, callback, socketMsg, elements) {
-    console.log('elements', elements)
     domManager.addEventListener(
       selector,
       "click",
@@ -44,16 +43,14 @@ export let domManager = {
     event.target.innerText = newTitle.value;
     newTitleForm.outerHTML = event.target.outerHTML;
     let callbackArg;
-    if(elements.length === 1 && elements[0].hasOwnProperty('board_id')) {
+    if (elements.length === 1 && elements[0].hasOwnProperty('board_id')) {
       callbackArg = [elements[0].board_id, elements[0].id];
-    } else if(elements.length === 2) {
+    } else if (elements.length === 2) {
       callbackArg = [...elements];
     } else {
       callbackArg = [elements[0]];
-      console.log('callbackArg', callbackArg)
     }
-    if(save) {
-      console.log('to callback', newTitle.value, userId, ...callbackArg)
+    if (save) {
       callback(newTitle.value, userId, ...callbackArg)
         .then(response => {
           flashList.innerHTML = '';
