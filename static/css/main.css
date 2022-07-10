@@ -15,8 +15,8 @@
     --shadow: rgba(0, 0, 0, 0.35);
 }
 
-html,
-body {
+html {
+    max-width: 100%;
     overflow-x: hidden !important;
 }
 
@@ -26,6 +26,7 @@ body {
     flex-direction: column;
     background: #ddd url(../img/diagonal-noise.png);
     font-family: sans-serif;
+    overflow-x: hidden !important;
 }
 
 @media screen and (max-width: 700px) {
@@ -117,18 +118,15 @@ button {
     padding: 4px 10px;
 }
 
-@media screen and (min-width: 1280px) {
-    .board-container {
-        max-width: 960px;
-        margin: 0 auto;
-    }
-}
-
 section.board {
     margin: 20px;
     border: aliceblue;
     background: #ffffff90;
     border-radius: 3px;
+}
+
+.board-container {
+    margin: 0 20px;
 }
 
 .board-header {
