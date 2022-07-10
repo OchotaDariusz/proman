@@ -220,16 +220,14 @@ async function reRenderDomForLoggedUser() {
 
 async function login(response) {
   userId = response['user_id'];
-  caches.open('workbox-precache-v2').then(function(cache) {
-    cache.delete('/?__WB_REVISION__=1').then(function(response) {
-      console.log('Cache removed')
-      reRenderDomForLoggedUser()
-        .then(async () => {
-          await boardsManager.reloadBoards(userId);
-        })
-        .catch(err => console.log(err));
-    });
-  })
+  caches.keys().then(function(names) {
+    for (let name of names)
+      caches.delete(name);
+  });
+  reRenderDomForLoggedUser()
+    .then(async () => {
+      await boardsManager.reloadBoards(userId);
+    })
     .catch(err => console.log(err));
 }
 
@@ -251,16 +249,14 @@ async function logout() {
   userId = 0;
 
   const urlTarget = `${window.location.href}logout`;
-  caches.open('workbox-precache-v2').then(function(cache) {
-    cache.delete('/?__WB_REVISION__=1').then(function(response) {
-      console.log('Cache removed')
-      sendRequest(urlTarget)
-        .then(() => {
-          showPopup(flashes);
-        })
-        .catch(err => console.log(err));
-    });
-  })
+  caches.keys().then(function(names) {
+    for (let name of names)
+      caches.delete(name);
+  });
+  sendRequest(urlTarget)
+    .then(() => {
+      showPopup(flashes);
+    })
     .catch(err => console.log(err));
 
   await reRenderDomForLoggedOutUser();
