@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=6.0, minimum-scale=0.5">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="description" content="Project management tool">
+    <meta name="theme-color" content="#ddd">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#ddd">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='favicon/favicon-152x152.png') }}">
+
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="16x16"
+          href="{{ url_for('static', filename='favicon/favicon-16x16.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32"
+          href="{{ url_for('static', filename='favicon/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="64x64"
+          href="{{ url_for('static', filename='favicon/favicon-64x64.png') }}">
+    <link rel="icon" type="image/png" sizes="96x96"
+          href="{{ url_for('static', filename='favicon/favicon-96x96.png') }}">
+    <link rel="icon" type="image/png" sizes="144x144"
+          href="{{ url_for('static', filename='favicon/favicon-144x144.png') }}">
+    <link rel="icon" type="image/png" sizes="152x152"
+          href="{{ url_for('static', filename='favicon/favicon-152x152.png') }}">
+    <link rel="icon" type="image/png" sizes="192x192"
+          href="{{ url_for('static', filename='favicon/favicon-192x192.png') }}">
+    <link rel="icon" type="image/png" sizes="384x384"
+          href="{{ url_for('static', filename='favicon/favicon-384x384.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512"
+          href="{{ url_for('static', filename='favicon/favicon-512x512.png') }}">
+
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/normalize.css') }}" media="screen">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}" media="screen">
+
+    <script src="{{ url_for('static', filename='js/671f235a9d.min.js') }}" async></script>
+
+    <title>{% block title %}{% endblock %}</title>
+
+</head>
+
+<body>
+
+
+<h1>{% block header %}{% endblock %}</h1>
+
+{% block body %}{% endblock %}
+
+{% if user %}
+    <script>
+      let userId = {{ user.id }};
+    </script>
+{% else %}
+    <script>
+      let userId = 0;
+    </script>
+{% endif %}
+
+<script>
+  const socketHost = '{{ socket_host }}';
+</script>
+
+<script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/popup.js') }}"></script>
+
+</body>
+
+</html>

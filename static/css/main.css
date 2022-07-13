@@ -15,10 +15,87 @@
     --shadow: rgba(0, 0, 0, 0.35);
 }
 
+html {
+    max-width: 100%;
+    overflow-x: hidden !important;
+}
+
 body {
     min-width: 620px;
+    display: flex;
+    flex-direction: column;
     background: #ddd url(../img/diagonal-noise.png);
     font-family: sans-serif;
+    overflow-x: hidden !important;
+}
+
+@media screen and (max-width: 700px) {
+    body {
+        min-width: 280px;
+    }
+
+    .board-add-column {
+        display: none;
+    }
+
+    .board-columns {
+        flex-direction: column !important;
+    }
+}
+
+@media screen and (max-width: 590px) {
+    .board-add-column,
+    .board-toggle-archived {
+        display: none !important;
+    }
+
+    .board-columns {
+        flex-direction: column !important;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .board-add-column,
+    .board-toggle-archived,
+    .board-add {
+        display: none !important;
+    }
+
+    .board-columns {
+        flex-direction: column !important;
+    }
+}
+
+@media screen and (max-width: 400px) {
+    .board-add-column,
+    .board-toggle-archived,
+    .board-add {
+        display: none !important;
+    }
+
+    .board-columns {
+        flex-direction: column !important;
+    }
+
+    .board-header {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 100px;
+    }
+
+    .board-remove {
+        margin: 0 13px 13px 13px !important;
+    }
+}
+
+#manual-sync {
+    display: inline-block;
+}
+
+@media screen and (max-width: 320px) {
+    #manual-sync {
+        display: none;
+    }
 }
 
 h1, .board-title, .board-column-title {
@@ -41,16 +118,15 @@ button {
     padding: 4px 10px;
 }
 
-.board-container {
-    max-width: 960px;
-    margin: 0 auto;
-}
-
 section.board {
     margin: 20px;
     border: aliceblue;
     background: #ffffff90;
     border-radius: 3px;
+}
+
+.board-container {
+    margin: 0 20px;
 }
 
 .board-header {
@@ -69,9 +145,10 @@ section.board {
     display: inline-block;
 }
 
-.fas.fa-trash-alt.board {
+.board-remove {
     float: right;
     margin-top: 13px;
+    margin-left: 13px
     cursor: pointer;
 }
 
@@ -83,6 +160,14 @@ section.board {
 .board-columns {
     display: flex;
     flex-wrap: nowrap;
+    flex-direction: row;
+}
+
+.board-card-header {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    margin-bottom: 5px;
 }
 
 .board-column {
@@ -179,11 +264,12 @@ section.board {
 .navbar {
     display: flex;
     justify-content: center;
+    margin-bottom: 10px;
 }
 
 .popup {
-    background: var(--shadow);
     height: 100vh;
+    width: 100vw;
     align-items: center;
     justify-content: center;
     display: none;
@@ -191,7 +277,6 @@ section.board {
     z-index: 1000;
     left: 0;
     top: 0;
-    width: 100vw;
 }
 
 .popup-header {
@@ -201,10 +286,11 @@ section.board {
 
 .form {
     display: grid;
-    grid-template-columns: repeat(6, 66px);
+    grid-template-columns: repeat(6, minmax(auto, 66px));
     padding: 20px;
+    margin: 10em;
     background-color: white;
-    box-shadow: 0 0 15px 0 var(--shadow);
+    box-shadow: 0 0 15px 0 var(--shadow), 0 0 0 100vmax var(--shadow);
 }
 
 .form label {
@@ -283,6 +369,7 @@ section.board {
     list-style-type: none;
     padding: 20px;
     text-align: center;
+    box-shadow: 0 0 15px 0 var(--shadow), 0 0 0 100vmax var(--shadow);
 }
 
 /* Tooltip container */
@@ -316,37 +403,42 @@ section.board {
 }
 
 .lds-ring {
-  display: inline-block;
-  position: relative;
-  width: 80px;
-  height: 80px;
+    display: inline-block;
+    position: relative;
+    width: 80px;
+    height: 80px;
 }
+
 .lds-ring div {
-  box-sizing: border-box;
-  display: block;
-  position: absolute;
-  width: 64px;
-  height: 64px;
-  margin: 8px;
-  border: 8px solid #333;
-  border-radius: 50%;
-  animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-  border-color: #333 transparent transparent transparent;
+    box-sizing: border-box;
+    display: block;
+    position: absolute;
+    width: 64px;
+    height: 64px;
+    margin: 8px;
+    border: 8px solid #333;
+    border-radius: 50%;
+    animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    border-color: #333 transparent transparent transparent;
 }
+
 .lds-ring div:nth-child(1) {
-  animation-delay: -0.45s;
+    animation-delay: -0.45s;
 }
+
 .lds-ring div:nth-child(2) {
-  animation-delay: -0.3s;
+    animation-delay: -0.3s;
 }
+
 .lds-ring div:nth-child(3) {
-  animation-delay: -0.15s;
+    animation-delay: -0.15s;
 }
+
 @keyframes lds-ring {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }

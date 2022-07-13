@@ -1,10 +1,10 @@
 <div class="popup" id="login-popup">
-    <form class="form" action="{{ url_for('post_login_page') }}" id="login">
+    <form class="form" id="login">
         <div class="popup-header">Login</div>
         <label for="username-login">Username<br>(e-mail):</label>
-        <input id="username-login" type="text" required>
+        <input id="username-login" type="text" maxlength="200" required placeholder="Enter your email...">
         <label for="password-login">Password:</label>
-        <input id="password-login" type="password" minlength="6" placeholder="Min. 6 characters long" required>
-        <button type="submit">Submit</button>
+        <input id="password-login" type="password" minlength="6" maxlength="200" placeholder="Min. 6 characters long" required>
+        <button type="submit">Login</button>
     </form>
 </div>

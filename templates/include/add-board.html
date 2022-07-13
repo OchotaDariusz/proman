@@ -2,8 +2,7 @@
     <form class="form" id="add-board">
         <div class="popup-header">Add new board</div>
         <label for="board-title">Board title:</label>
-        <input id="board-title" type="text" required placeholder="New board">
-        <input type="hidden" name="userid" value="{{ user.id }}">
+        <input id="board-title" type="text" maxlength="20" required placeholder="New board...">
         <button type="submit">Add</button>
     </form>
 </div>

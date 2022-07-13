@@ -1,0 +1,13 @@
+<div class="navbar">
+    <nav>
+        {% if user %}
+            <button type="button" id="login-button" style="display: none;">Login</button>
+            <button type="button" id="register-button" style="display: none;">Register</button>
+            <button type="submit" class="logout">Logout</button>
+        {% else %}
+            <button type="button" id="login-button">Login</button>
+            <button type="button" id="register-button">Register</button>
+            <button type="submit" style="display: none" class="logout">Logout</button>
+        {% endif %}
+    </nav>
+</div>

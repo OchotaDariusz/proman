@@ -1,6 +1,6 @@
-import {cardsManager} from "./controller/cardsManager.js";
-import {boardsManager} from "./controller/boardsManager.js";
-import {columnsManager} from "./controller/columnsManager.js";
+import { cardsManager } from "./controller/cardsManager.js";
+import { boardsManager, loadBoardContent } from "./controller/boardsManager.js";
+import { columnsManager } from "./controller/columnsManager.js";
 
 export const loginPopup = document.querySelector('#login-popup');
 const loginButton = document.querySelector('#login-button');
@@ -19,10 +19,12 @@ export const createCardPopup = document.querySelector('#create-card');
 const createCardForm = document.querySelector('#create-card-form');
 const createCardTitle = document.querySelector('#card-title');
 export const createCardStatus = document.querySelector('#card-status');
+export const createCardHiddenInput = document.querySelector('#create-card-hidden-input');
 
 export const createColumnPopup = document.querySelector('#create-column')
 const createColumnForm = document.querySelector('#create-column-form')
 const createColumnTitle = document.querySelector('#column-title')
+export const createColumnHiddenInput = document.querySelector('#create-column-hidden-input');
 
 const addBoardPopup = document.querySelector('#add-board-popup');
 let addBoardButton = document.querySelector('#add-board-button');
@@ -46,238 +48,248 @@ export const flashes = document.querySelector('.flashes');
 export const flashList = document.querySelector('.flash');
 
 export const showPopup = element => {
-    element.classList.add('fade-in');
-    element.classList.remove('fade-out');
-    element.style.display = 'flex';
+  element.classList.add('fade-in');
+  element.classList.remove('fade-out');
+  element.style.display = 'flex';
 }
 
-const closePopup = element => {
-    flashList.innerHTML = "<div class='lds-ring'><div>";
-    element.classList.remove('fade-in');
-    element.style.display = 'none';
+export const closePopup = element => {
+  flashList.innerHTML = "<div class='lds-ring'><div>";
+  element.classList.remove('fade-in');
+  element.style.display = 'none';
 }
 
 if (loginButton) {
-    loginButton.addEventListener('click', () => {
-        showPopup(loginPopup);
-    });
+  loginButton.addEventListener('click', () => {
+    showPopup(loginPopup);
+  });
 }
 
 function addBoardButtonLoginAddEvent() {
-    addBoardButtonLogin = document.querySelector('#add-board-button-login');
-    addBoardButtonLogin = removeAllEventListeners(addBoardButtonLogin);
-    addBoardButtonLogin.addEventListener('click', () => {
-        showPopup(loginPopup);
-    });
+  addBoardButtonLogin = document.querySelector('#add-board-button-login');
+  addBoardButtonLogin = removeAllEventListeners(addBoardButtonLogin);
+  addBoardButtonLogin.addEventListener('click', () => {
+    showPopup(loginPopup);
+  });
 }
 
 if (addBoardButtonLogin) {
-    addBoardButtonLoginAddEvent();
+  addBoardButtonLoginAddEvent();
 }
 
 if (registerButton) {
-    registerButton.addEventListener('click', () => {
-        showPopup(registerPopup);
-    });
+  registerButton.addEventListener('click', () => {
+    showPopup(registerPopup);
+  });
 }
 
 popUps.forEach(popUp => {
-    popUp.addEventListener('click', () => {
-        popUp.classList.remove('fade-in');
-        popUp.classList.add('fade-out');
-        setTimeout(() => {
-            closePopup(popUp);
-        }, 400);
-    });
+  popUp.addEventListener('click', () => {
+    popUp.classList.remove('fade-in');
+    popUp.classList.add('fade-out');
+    setTimeout(() => {
+      closePopup(popUp);
+    }, 400);
+  });
 })
 
 form.forEach(item => {
-    item.addEventListener('click', event => {
-        event.stopPropagation();
-    });
+  item.addEventListener('click', event => {
+    event.stopPropagation();
+  });
 });
 
 loginForm.addEventListener('submit', event => {
-    event.preventDefault();
+  event.preventDefault();
 
-    const urlTarget = `${window.location.href}login`;
+  const urlTarget = `${window.location.href}login`;
 
-    const userData = {
-        username: usernameLogin.value,
-        password: passwordLogin.value
-    };
+  const userData = {
+    username: usernameLogin.value,
+    password: passwordLogin.value
+  };
 
-    sendRequest(urlTarget, userData)
-        .then(() => {
-            showPopup(flashes);
-        })
-        .catch(err => console.log(err));
+  sendRequest(urlTarget, userData)
+    .then(() => {
+      showPopup(flashes);
+    })
+    .catch(err => console.log(err));
 
-    loginForm.reset();
-    closePopup(loginPopup);
+  loginForm.reset();
+  closePopup(loginPopup);
 });
 
 registerForm.addEventListener('submit', event => {
-    event.preventDefault();
+  event.preventDefault();
 
-    const urlTarget = `${window.location.href}register`;
+  const urlTarget = `${window.location.href}register`;
 
-    const userData = {
-        username: usernameRegister.value,
-        password: passwordRegister.value,
-        password2: passwordRegister2.value
-    };
-    sendRequest(urlTarget, userData)
-        .then(() => {
-            showPopup(flashes);
-        })
-        .catch(err => console.log(err));
+  const userData = {
+    username: usernameRegister.value,
+    password: passwordRegister.value,
+    password2: passwordRegister2.value
+  };
+  sendRequest(urlTarget, userData)
+    .then(() => {
+      showPopup(flashes);
+    })
+    .catch(err => console.log(err));
 
-    registerForm.reset();
-    closePopup(registerPopup);
+  registerForm.reset();
+  closePopup(registerPopup);
 });
 
 if (createCardForm) {
-    createCardForm.addEventListener('submit', async event => {
-        event.preventDefault();
+  createCardForm.addEventListener('submit', event => {
+    event.preventDefault();
 
-        const cardTitle = createCardTitle.value;
-        const cardStatus = createCardStatus.value;
-        const boardId = localStorage.getItem('boardId');
-        localStorage.removeItem('boardId');
+    const cardTitle = createCardTitle.value;
+    const cardStatus = createCardStatus.value;
+    const boardId = createCardHiddenInput.value;
+    createCardHiddenInput.setAttribute('value', '0');
 
-        await cardsManager.createCard(cardTitle, boardId, cardStatus);
-
-        createCardForm.reset();
-        closePopup(createCardPopup);
-    });
+    cardsManager.createCard(cardTitle, boardId, cardStatus, userId)
+      .then(() => createCardForm.reset())
+      .catch(err => console.log(err));
+  });
 }
 
 if (createColumnForm) {
-    createColumnForm.addEventListener('submit', async event => {
-        event.preventDefault();
+  createColumnForm.addEventListener('submit', async event => {
+    event.preventDefault();
 
-        const columnTitle = createColumnTitle.value;
-        const boardId = localStorage.getItem('boardId');
-        localStorage.removeItem('boardId');
+    const columnTitle = createColumnTitle.value;
+    const boardId = createColumnHiddenInput.value;
+    createColumnHiddenInput.setAttribute('value', '0');
 
-        await columnsManager.createColumn(columnTitle, boardId);
+    await columnsManager.createColumn(columnTitle, boardId);
 
-        createColumnForm.reset();
-        closePopup(createColumnPopup);
-    });
+    createColumnForm.reset();
+    closePopup(createColumnPopup);
+  });
 }
 
 function addBoardButtonAddEvent() {
-    addBoardButton = document.querySelector('#add-board-button');
-    addBoardButton = removeAllEventListeners(addBoardButton);
-    addBoardButton.addEventListener('click', () => {
-        showPopup(addBoardPopup);
-    });
+  addBoardButton = document.querySelector('#add-board-button');
+  addBoardButton = removeAllEventListeners(addBoardButton);
+  addBoardButton.addEventListener('click', () => {
+    showPopup(addBoardPopup);
+  });
 }
 
 if (addBoardButton) {
-    addBoardButtonAddEvent();
+  addBoardButtonAddEvent();
 }
 
 addBoardForm.addEventListener('submit', async event => {
-    event.preventDefault();
+  event.preventDefault();
 
-    const boardTitle = addBoardTitle.value;
-    await boardsManager.createBoard(boardTitle, 'public', userId)
-    closePopup(addBoardPopup);
+  const boardTitle = addBoardTitle.value;
+  await boardsManager.createBoard(boardTitle, 'public', userId)
+  closePopup(addBoardPopup);
 });
 
 if (addPrivateBoardButton) {
-    addPrivateBoardButton.addEventListener('click', () => {
-        showPopup(addPrivateBoardPopup);
-    });
+  addPrivateBoardButton.addEventListener('click', () => {
+    showPopup(addPrivateBoardPopup);
+  });
 }
 
 addPrivateBoardForm.addEventListener('submit', async event => {
-    event.preventDefault();
+  event.preventDefault();
 
-    const boardTitle = addPrivateBoardTitle.value;
-    await boardsManager.createBoard(boardTitle, 'private');
-    closePopup(addPrivateBoardPopup);
+  const boardTitle = addPrivateBoardTitle.value;
+  await boardsManager.createBoard(boardTitle, 'private');
+  closePopup(addPrivateBoardPopup);
 });
 
 async function reRenderDomForLoggedUser() {
-    addPrivateBoardButton.style.display = 'inline-block';
-    addBoardButtonLogin.id = 'add-board-button';
-    addBoardButtonAddEvent();
+  addPrivateBoardButton.style.display = 'inline-block';
+  addBoardButtonLogin.id = 'add-board-button';
+  addBoardButtonAddEvent();
 
-    sectionsBoard = document.querySelectorAll('section.board');
-    sectionsBoard.forEach(section => section.remove());
-    await boardsManager.loadBoards(userId);
+  sectionsBoard = document.querySelectorAll('section.board');
+  sectionsBoard.forEach(section => section.remove());
+  await boardsManager.loadBoards(userId);
 
-    loginButton.style.display = 'none';
-    registerButton.style.display = 'none';
-    logoutButton.style.display = 'inline-block';
-    logoutButton.addEventListener('click', logout);
+  loginButton.style.display = 'none';
+  registerButton.style.display = 'none';
+  logoutButton.style.display = 'inline-block';
+  logoutButton.addEventListener('click', logout);
 }
 
 async function login(response) {
-    userId = response['user_id'];
-    await reRenderDomForLoggedUser();
+  userId = response['user_id'];
+  caches.keys().then(function(names) {
+    for (let name of names)
+      caches.delete(name);
+  });
+  reRenderDomForLoggedUser()
+    .then(async () => {
+      await boardsManager.reloadBoards(userId);
+    })
+    .catch(err => console.log(err));
 }
 
 async function reRenderDomForLoggedOutUser() {
-    addPrivateBoardButton.style.display = 'none';
-    addBoardButton.id = 'add-board-button-login';
-    addBoardButtonLoginAddEvent();
+  addPrivateBoardButton.style.display = 'none';
+  addBoardButton.id = 'add-board-button-login';
+  addBoardButtonLoginAddEvent();
 
-    sectionsBoard = document.querySelectorAll('section.board');
-    sectionsBoard.forEach(section => section.remove());
-    await boardsManager.loadBoards(userId);
+  sectionsBoard = document.querySelectorAll('section.board');
+  sectionsBoard.forEach(section => section.remove());
+  await boardsManager.loadBoards(userId);
 
-    loginButton.style.display = 'inline-block';
-    registerButton.style.display = 'inline-block';
-    logoutButton.style.display = 'none';
+  loginButton.style.display = 'inline-block';
+  registerButton.style.display = 'inline-block';
+  logoutButton.style.display = 'none';
 }
 
 async function logout() {
-    userId = 0;
+  userId = 0;
 
-    const urlTarget = `${window.location.href}logout`;
+  const urlTarget = `${window.location.href}logout`;
+  caches.keys().then(function(names) {
+    for (let name of names)
+      caches.delete(name);
+  });
+  sendRequest(urlTarget)
+    .then(() => {
+      showPopup(flashes);
+    })
+    .catch(err => console.log(err));
 
-    sendRequest(urlTarget)
-        .then(() => {
-            showPopup(flashes);
-        })
-        .catch(err => console.log(err));
-
-    await reRenderDomForLoggedOutUser();
+  await reRenderDomForLoggedOutUser();
 }
 
 async function sendRequest(urlTarget, userData = null) {
-    fetch(urlTarget, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(userData),
+  fetch(urlTarget, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(userData),
+  })
+    .then(response => {
+      flashList.innerHTML = '';
+      return response.json()
     })
-        .then(response => {
-            flashList.innerHTML = '';
-            return response.json()
-        })
-        .then(async response => {
-            if (response.hasOwnProperty('user_id')) {
-                await login(response);
-                flashList.innerHTML = `<li>${response['message']}</li>`;
-            } else {
-                console.log(response['message']);
-                flashList.innerHTML = `<li>${response['message']}</li>`;
-            }
-        })
-        .catch(error => console.error(error));
+    .then(async response => {
+      if (response.hasOwnProperty('user_id')) {
+        await login(response);
+        flashList.innerHTML = `<li>${response['message']}</li>`;
+      } else {
+        console.log(response['message']);
+        flashList.innerHTML = `<li>${response['message']}</li>`;
+      }
+    })
+    .catch(error => console.error(error));
 }
 
 function removeAllEventListeners(element) {
-    let newElement = element.cloneNode(true);
-    element.parentNode.replaceChild(newElement, element);
-    return newElement;
+  let newElement = element.cloneNode(true);
+  element.parentNode.replaceChild(newElement, element);
+  return newElement;
 }
 
 logoutButton.addEventListener('click', logout);
