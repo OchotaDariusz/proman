@@ -1,3 +1,5 @@
+Plain HTML/CSS/JavaScript + Python Flask backend
+
 https://proman.onrender.com
 
 ##### Example user
